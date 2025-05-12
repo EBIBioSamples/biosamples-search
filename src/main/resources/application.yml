@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: biosamples-search
+  elasticsearch:
+    username: elastic
+    password: elastic
+    uris: http://localhost:9200
+management:
+  endpoints:
+    web:
+      exposure:
+        include: metrics,health
+
+
+
