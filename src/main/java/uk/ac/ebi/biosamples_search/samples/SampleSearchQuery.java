@@ -1,8 +1,10 @@
 package uk.ac.ebi.biosamples_search.samples;
 
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
 
-@Data
+@Getter
+@Builder
 public class SampleSearchQuery {
   private final String text;
   private final String[] filter;
@@ -10,5 +12,5 @@ public class SampleSearchQuery {
   private final Integer page;
   private final Integer size;
   private final String[] sort;
-  private final boolean applyCurations;
+  private final boolean curate;
 }

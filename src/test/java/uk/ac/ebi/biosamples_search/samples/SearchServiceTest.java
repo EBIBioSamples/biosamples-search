@@ -6,13 +6,12 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-class SamplesServiceTest {
+class SearchServiceTest {
   @InjectMocks
-  SamplesService samplesService;
+  SearchService samplesService;
 
 
   @Test

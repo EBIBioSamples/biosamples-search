@@ -1,22 +1,22 @@
 package uk.ac.ebi.biosamples_search.samples;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.server.core.EmbeddedWrapper;
+import org.springframework.hateoas.server.core.EmbeddedWrappers;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 public class SamplesController {
   private final SampleModelAssembler modelAssembler;
-  private final SamplesService samplesService;
-
-  public SamplesController(SampleModelAssembler modelAssembler, SamplesService samplesService) {
-    this.modelAssembler = modelAssembler;
-    this.samplesService = samplesService;
-  }
+  private final SearchService samplesService;
 
   @GetMapping("/test")
   public String postTestMessage() {
@@ -26,22 +26,59 @@ public class SamplesController {
   @GetMapping("/samples/{accession}")
   public EntityModel<Sample> getSample(@PathVariable String accession) {
     //TODO
-    return modelAssembler.toModel(new Sample(accession, "hello", "hello"));
+    return modelAssembler.toModel(Sample.builder().build());
   }
 
   @GetMapping("/search")
-  public CollectionModel<EntityModel<Sample>> searchSamples() {
-    return CollectionModel.of(samplesService.searchSamples().stream().map(modelAssembler::toModel).toList());
+  public PagedModel<EmbeddedWrapper> searchSamples() {
+    Page<Sample> samples = samplesService.searchSamples();
+    //EmbeddedWrappers to rename default _embedded serialisation format
+    EmbeddedWrappers wrappers = new EmbeddedWrappers(false);
+    List<EmbeddedWrapper> elements = samples.stream()
+        .map(s -> wrappers.wrap(s.getAccession(), LinkRelation.of("accessions")))
+        .toList();
+
+    return PagedModel.of(
+        elements,
+        new PagedModel.PageMetadata(
+            samples.getSize(),
+            samples.getNumber(),
+            samples.getTotalElements(),
+            samples.getTotalPages()
+        ),
+        Link.of("search/self").withSelfRel(),
+        Link.of("search/next/cursor").withRel("next"));
   }
 
   @PostMapping("/search")
-  public CollectionModel<EntityModel<Sample>> searchSamples(@RequestBody SampleSearchQuery query) {
-    return CollectionModel.of(samplesService.searchSamples().stream().map(modelAssembler::toModel).toList());
+  public PagedModel<EmbeddedWrapper> searchSamples(@RequestBody SampleSearchQuery query) {
+    Page<Sample> samples = samplesService.searchSamples();
+    //EmbeddedWrappers to rename default _embedded serialisation format
+    EmbeddedWrappers wrappers = new EmbeddedWrappers(false);
+    List<EmbeddedWrapper> elements = samples.stream()
+        .map(s -> wrappers.wrap(s.getAccession(), LinkRelation.of("accessions")))
+        .toList();
+
+    return PagedModel.of(
+        elements,
+        new PagedModel.PageMetadata(
+            samples.getSize(),
+            samples.getNumber(),
+            samples.getTotalElements(),
+            samples.getTotalPages()
+        ),
+        Link.of("search/self").withSelfRel(),
+        Link.of("search/next/cursor").withRel("next"));
   }
+
+//  @PostMapping("/search")
+//  public CollectionModel<EntityModel<Sample>> searchSamples(@RequestBody SampleSearchQuery query) {
+//    return CollectionModel.of(samplesService.searchSamples().stream().map(modelAssembler::toModel).toList());
+//  }
 
   @GetMapping("/index")
   public void index() {
-    samplesService.index();
+    samplesService.indexFromResourceFile();
   }
 
 //  @CrossOrigin(methods = RequestMethod.GET)

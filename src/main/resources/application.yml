@@ -5,6 +5,9 @@ spring:
     username: elastic
     password: elastic
     uris: http://localhost:9200
+  jackson:
+    deserialization:
+      FAIL_ON_UNKNOWN_PROPERTIES: false
 management:
   endpoints:
     web:
