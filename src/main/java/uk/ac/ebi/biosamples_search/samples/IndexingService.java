@@ -20,14 +20,6 @@ import java.util.List;
 public class IndexingService {
   private final SamplesRepository samplesRepository;
   private final ObjectMapper objectMapper;
-  private final ElasticsearchOperations elasticsearchOperations;
-
-  public Page<Sample> searchSamples() {
-//    Page page = PageRequest.of(0, 10).;
-//    Iterable<Sample> samples = samplesRepository.findAll();
-    Page<Sample> samples = samplesRepository.findAll(Pageable.unpaged());
-    return samples;
-  }
 
   public void index() {
     //todo
@@ -45,41 +37,4 @@ public class IndexingService {
       throw new RuntimeException(e);
     }
   }
-
-//  public List<Sample> searchByAttribute(String key, String value) {
-//    QueryBuilder nestedQuery = QueryBuilders.nestedQuery("attributes",
-//        QueryBuilders.boolQuery()
-//            .must(QueryBuilders.termQuery("attributes.key", key))
-//            .must(QueryBuilders.termQuery("attributes.value", value)),
-//        ScoreMode.None);
-//
-//    NativeSearchQuery query = new NativeSearchQueryBuilder()
-//        .withQuery(nestedQuery)
-//        .build();
-//
-//    return elasticsearchOperations
-//        .search(query, Product.class)
-//        .stream()
-//        .map(SearchHit::getContent)
-//        .toList();
-//  }
-
-//  public List<Sample> searchByAttribute(String key, String value) {
-//    BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
-//        .must(QueryBuilders.termQuery("attributes.key", key))
-//        .must(QueryBuilders.termQuery("attributes.value.keyword", value)); // Use the keyword sub-field
-//
-//    NestedQueryBuilder nestedQuery = QueryBuilders.nestedQuery("attributes", boolQuery, org.elasticsearch.search.sort.SortMode.none);
-//
-//    NativeSearchQuery query = new NativeSearchQueryBuilder()
-//        .withQuery(nestedQuery)
-//        .build();
-//
-//    return elasticsearchOperations
-//        .search(query, Sample.class)
-//        .stream()
-//        .map(SearchHit::getContent)
-//        .toList();
-//  }
-
 }
