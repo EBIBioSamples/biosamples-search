@@ -1,25 +1,22 @@
 package uk.ac.ebi.biosamples_search.samples;
 
-import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
-import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
-import org.springframework.data.elasticsearch.core.*;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHitSupport;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.stereotype.Service;
+import uk.ac.ebi.biosamples_search.samples.filter.AttributeSearchFilter;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -29,119 +26,108 @@ public class SearchService {
   private final ElasticsearchOperations elasticsearchOperations;
 
   public Page<Sample> searchSamples() {
-//    Page page = PageRequest.of(0, 10).;
-//    Iterable<Sample> samples = samplesRepository.findAll();
-    Page<Sample> samples = samplesRepository.findAll(Pageable.unpaged());
-    return samples;
+    return samplesRepository.findAll(Pageable.unpaged());
   }
 
-  public SearchHits<Sample> searchSamples(SampleSearchQuery searchQuery) {
+  public SearchPage<Sample> search(SearchQuery searchQuery) {
+    PageRequest pageRequest = getPage(searchQuery);
+    Query matchQuery = getTextMatchQuery(searchQuery);
+    Query filterQuery = getFilterQuery(searchQuery);
+    NativeQuery query = getEsNativeQuery(pageRequest, matchQuery, filterQuery);
+    return searchForSamplePage(query);
+  }
 
-    Pageable page = Pageable.ofSize(searchQuery.getSize());
+  private PageRequest getPage(SearchQuery searchQuery) {
+    PageRequest pageRequest = PageRequest.of(
+        searchQuery.getPage(),
+        searchQuery.getSize(),
+        Sort.by("update").descending());
+    return pageRequest;
+  }
 
-//    Query query = NativeQuery.builder()
-////        .withAggregation("lastNames", Aggregation.of(a -> a
-////            .terms(ta -> ta.field("lastName").size(10))))
-//        .withQuery(q -> q
-//            .match(m -> m
-//                .field("accession")
-//                .query("SAMD00000001")
+  private Query getTextMatchQuery(SearchQuery searchQuery) {
+    String searchText = searchQuery.getText();
+    Query matchQuery = MatchQuery.of(m -> m
+        .field("sample_full_text")
+        .query(searchText)
+    )._toQuery();
+    return matchQuery;
+  }
+
+  private Query getFilterQuery(SearchQuery searchQuery) {
+//    List<Query> filterQueries = new ArrayList<>();
+
+
+    List<Query> filterQueries = searchQuery.getFilters().stream()
+        .filter(f -> f instanceof AttributeSearchFilter)
+        .map(f -> {
+          AttributeSearchFilter filter = (AttributeSearchFilter) f;
+          return filter.getQuery();
+//          return NestedQuery.of(n -> n
+//              .path("characteristics")
+//              .query(q -> q
+//                  .bool(b -> b
+//                      .must(List.of(
+//                          TermQuery.of(t -> t.field("characteristics.key.keyword").value(filter.getField()))._toQuery(),
+//                          TermQuery.of(t -> t.field("characteristics.value.keyword").value(filter.getValue()))._toQuery()
+//                      ))
+//                  )
+//              )
+//          )._toQuery();
+        }).toList();
+
+//    Query nestedFilterQuery = NestedQuery.of(n -> n
+//        .path("characteristics")
+//        .query(q -> q
+//            .bool(b -> b
+//                .must(List.of(
+//                    TermQuery.of(t -> t.field("characteristics.key").value("env_medium"))._toQuery(),
+//                    TermQuery.of(t -> t.field("characteristics.value").value("soil"))._toQuery()
+//                ))
 //            )
 //        )
-//        .withPageable(page)
-//        .build();
+//    )._toQuery();
+//    filterQueries.add(nestedFilterQuery);
+//
+//    nestedFilterQuery = NestedQuery.of(n -> n
+//        .path("characteristics")
+//        .query(q -> q
+//            .bool(b -> b
+//                .must(List.of(
+//                    TermQuery.of(t -> t.field("characteristics.key").value("rel_to_oxygen"))._toQuery(),
+//                    TermQuery.of(t -> t.field("characteristics.value").value("aerobe"))._toQuery()
+//                ))
+//            )
+//        )
+//    )._toQuery();
+//    filterQueries.add(nestedFilterQuery);
 
-    Query matchQuery = MatchQuery.of(m -> m
-        .field("status")
-        .query("PUBLIC")
-    )._toQuery();
+    if (filterQueries.isEmpty()) {
+      return MatchAllQuery.of(m -> m)._toQuery();
+    }
 
-    Query nestedFilterQuery = NestedQuery.of(n -> n
-        .path("characteristics")
-        .query(q -> q
-            .bool(b -> b
-                .must(List.of(
-                    TermQuery.of(t -> t
-                        .field("characteristics.key")
-                        .value("env_medium")
-                    )._toQuery(),
-                    TermQuery.of(t -> t
-                        .field("characteristics.value")
-                        .value("soil")
-                    )._toQuery()
-                ))
-            )
-        )
-    )._toQuery();
-
-    Query finalQuery = BoolQuery.of(b -> b
-        .must(matchQuery)
-        .filter(nestedFilterQuery)
-    )._toQuery();
-
-    NativeQuery query = NativeQuery.builder()
-        .withQuery(finalQuery)
-        .build();
-
-
-    log.info("Generated Elasticsearch Query: {}", query.getQuery().toString());
-    SearchHits<Sample> searchHits = elasticsearchOperations.search(query, Sample.class);
-    return searchHits;
+    return BoolQuery.of(b -> b.must(filterQueries))._toQuery();
   }
 
-  public SearchPage<Sample> search(String nameQuery, int page, int size) {
-    Query matchQuery = MatchQuery.of(m -> m
-        .field("status")
-        .query(nameQuery)
-    )._toQuery();
-
-    Query nestedFilterQuery = NestedQuery.of(n -> n
-        .path("characteristics")
-        .query(q -> q
-            .bool(b -> b
-                .must(List.of(
-                    TermQuery.of(t -> t.field("characteristics.key").value("env_medium"))._toQuery(),
-                    TermQuery.of(t -> t.field("characteristics.value").value("soil"))._toQuery()
-                ))
-            )
-        )
-    )._toQuery();
-
+  private NativeQuery getEsNativeQuery(PageRequest page, Query match, Query filter) {
     Query finalQuery = BoolQuery.of(b -> b
-        .must(matchQuery)
-        .filter(nestedFilterQuery)
+        .must(match)
+        .filter(filter)
     )._toQuery();
-
-    Aggregation attributeKeyFacet = Aggregation.of(a -> a
-        .nested(n -> n.path("characteristics"))
-        .aggregations("by_key", subAgg -> subAgg
-            .terms(t -> t.field("characteristics.key.keyword"))
-        )
-    );
-
-    PageRequest pageRequest = PageRequest.of(0, 10, org.springframework.data.domain.Sort.by("update").descending());
 
     NativeQuery query = NativeQuery.builder()
         .withQuery(finalQuery)
-        .withPageable(pageRequest)
-//        .withSort(org.springframework.data.domain.Sort.by("update").ascending())
-        .withAggregation("attribute_keys", attributeKeyFacet)
+        .withPageable(page)
+        .withSort(page.getSort())
         .build();
 
+    return query;
+  }
+
+  private SearchPage<Sample> searchForSamplePage(NativeQuery query) {
     log.info("Generated Elasticsearch Query: {}", query.getQuery().toString());
     SearchHits<Sample> hits = elasticsearchOperations.search(query, Sample.class);
-
-    Map<String, Aggregate> aggregations = getAggregations(hits);
-    AggregationsContainer<?> aggContainer = hits.getAggregations();
-    List<Aggregation> ags = (List<Aggregation>) aggContainer.aggregations();
-
-    return SearchHitSupport.searchPageFor(hits, pageRequest);
-  }
-
-  public Map<String, Aggregate> getAggregations(SearchHits<Sample> hits) {
-    Map<String, Aggregate> aggregationsMap = new HashMap<>();
-
-    return aggregationsMap;
+    return SearchHitSupport.searchPageFor(hits, query.getPageable());
   }
 
 }

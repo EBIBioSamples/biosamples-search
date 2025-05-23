@@ -22,7 +22,6 @@ public class Sample {
   protected String sraAccession;
   @Field(type = FieldType.Text)
   protected String name;
-  protected String domain;
   protected String webinSubmissionAccountId;
   protected Long taxId;
   protected SampleStatus status;
