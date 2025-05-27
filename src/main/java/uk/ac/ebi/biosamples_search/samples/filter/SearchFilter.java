@@ -1,5 +1,6 @@
 package uk.ac.ebi.biosamples_search.samples.filter;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 )
 @JsonSubTypes({
     @JsonSubTypes.Type(value = AccessionSearchFilter.class, name = "acc"),
+    @JsonSubTypes.Type(value = AccessionSearchFilter.class, name = "sAcc"), //SRA Accession
     @JsonSubTypes.Type(value = NameSearchFilter.class, name = "name"),
     @JsonSubTypes.Type(value = WebinIdSearchFilter.class, name = "webin"),
     @JsonSubTypes.Type(value = DateRangeSearchFilter.class, name = "dt"),
@@ -20,8 +22,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 })
 public sealed interface SearchFilter permits AccessionSearchFilter, NameSearchFilter, WebinIdSearchFilter,
     DateRangeSearchFilter, AttributeSearchFilter, RelationshipSearchFilter,
-    ExternalRefSearchFilter, StructuredDataSearchFilter {
-    //todo SraAccession?
+    ExternalRefSearchFilter, StructuredDataSearchFilter, SraAccessionSearchFilter {
 
-  //todo populate ES query
+  Query getQuery();
 }

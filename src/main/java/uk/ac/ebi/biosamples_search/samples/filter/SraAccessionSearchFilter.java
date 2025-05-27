@@ -3,11 +3,11 @@ package uk.ac.ebi.biosamples_search.samples.filter;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
 
-public record AccessionSearchFilter(String accession) implements SearchFilter {
+public record SraAccessionSearchFilter(String accession) implements SearchFilter {
 
   public Query getQuery() {
     return TermQuery.of(t -> t
-        .field("accession.keyword")
+        .field("sraAccession.keyword")
         .value(accession)
     )._toQuery();
   }

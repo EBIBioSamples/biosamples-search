@@ -23,7 +23,10 @@ public final class AttributeSearchFilter implements SearchFilter {
             .bool(b -> b
                 .must(
                     List.of(
-                        TermQuery.of(t -> t.field("characteristics.key.keyword").value(field))._toQuery(),
+                        TermQuery.of(t -> t
+                            .field("characteristics.key.keyword")
+                            .value(field)
+                        )._toQuery(),
                         buildSubQueryForOrCondition()
                     )
                 )
@@ -38,7 +41,10 @@ public final class AttributeSearchFilter implements SearchFilter {
             .should(
                 values.stream()
                     .map(v ->
-                        TermQuery.of(t -> t.field("characteristics.value.keyword").value(v))._toQuery())
+                        TermQuery.of(t -> t
+                            .field("characteristics.value.keyword")
+                            .value(v)
+                        )._toQuery())
                     .toList()
             )
         )
