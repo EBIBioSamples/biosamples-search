@@ -11,6 +11,7 @@ import org.springframework.hateoas.server.core.EmbeddedWrapper;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
+import uk.ac.ebi.biosamples_search.samples.facet.Facet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.List;
 public class SamplesController {
   private final SearchService samplesService;
   private final IndexingService indexingService;
+  private final FacetService facetService;
 
   @GetMapping("/search")
   public PagedModel<EmbeddedWrapper> searchSamples(
@@ -65,6 +67,11 @@ public class SamplesController {
             searchPage.getTotalPages()
         ),
         links);
+  }
+
+  @PostMapping("/facet")
+  public List<Facet> facet(@RequestBody SearchQuery query) {
+    return facetService.search(query);
   }
 
   private List<Link> populateLinks(Page<?> searchPage) {
