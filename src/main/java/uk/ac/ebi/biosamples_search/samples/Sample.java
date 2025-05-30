@@ -41,6 +41,7 @@ public class Sample {
   @Field(type = FieldType.Nested)
   protected Set<Relationship> relationships;
   @Field(type = FieldType.Nested)
+  @JsonDeserialize(using = ExternalReferenceDeserializer.class)
   protected Set<ExternalReference> externalReferences;
   @Field(type = FieldType.Nested)
   protected Set<Organization> organizations;

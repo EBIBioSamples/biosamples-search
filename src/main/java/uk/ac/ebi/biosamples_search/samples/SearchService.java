@@ -1,8 +1,5 @@
 package uk.ac.ebi.biosamples_search.samples;
 
-import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.MatchAllQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,9 +13,7 @@ import org.springframework.data.elasticsearch.core.SearchHitSupport;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.stereotype.Service;
-import uk.ac.ebi.biosamples_search.samples.filter.SearchFilter;
-
-import java.util.List;
+import uk.ac.ebi.biosamples_search.es.QueryHelper;
 
 @Slf4j
 @Service
@@ -33,9 +28,8 @@ public class SearchService {
 
   public SearchPage<Sample> search(SearchQuery searchQuery) {
     PageRequest pageRequest = getPage(searchQuery);
-    Query matchQuery = getTextMatchQuery(searchQuery);
-    Query filterQuery = getFilterQuery(searchQuery);
-    NativeQuery query = getEsNativeQuery(pageRequest, matchQuery, filterQuery);
+    Query esSearchQuery = QueryHelper.getSearchQuery(searchQuery);
+    NativeQuery query = getEsNativeQuery(pageRequest, esSearchQuery);
     return searchForSamplePage(query);
   }
 
@@ -46,33 +40,9 @@ public class SearchService {
         Sort.by("update").descending());
   }
 
-  private Query getTextMatchQuery(SearchQuery searchQuery) {
-    String searchText = searchQuery.getText();
-    return MatchQuery.of(m -> m
-        .field("sample_full_text")
-        .query(searchText)
-    )._toQuery();
-  }
-
-  private Query getFilterQuery(SearchQuery searchQuery) {
-    List<Query> filterQueries = searchQuery.getFilters().stream()
-        .map(SearchFilter::getQuery).toList();
-
-    if (filterQueries.isEmpty()) {
-      return MatchAllQuery.of(m -> m)._toQuery();
-    }
-
-    return BoolQuery.of(b -> b.must(filterQueries))._toQuery();
-  }
-
-  private NativeQuery getEsNativeQuery(PageRequest page, Query match, Query filter) {
-    Query query = BoolQuery.of(b -> b
-        .must(match)
-        .filter(filter)
-    )._toQuery();
-
+  private NativeQuery getEsNativeQuery(PageRequest page, Query searchQuery) {
     return NativeQuery.builder()
-        .withQuery(query)
+        .withQuery(searchQuery)
         .withPageable(page)
         .withSort(page.getSort())
         .build();

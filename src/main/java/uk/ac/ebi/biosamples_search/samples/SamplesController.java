@@ -71,7 +71,7 @@ public class SamplesController {
 
   @PostMapping("/facet")
   public List<Facet> facet(@RequestBody SearchQuery query) {
-    return facetService.search(query);
+    return facetService.getFacets(query);
   }
 
   private List<Link> populateLinks(Page<?> searchPage) {
