@@ -17,6 +17,31 @@ repositories {
 	mavenCentral()
 }
 
+
+sourceSets {
+	create("integrationTest") {
+		java.srcDir("src/it/java")
+		resources.srcDir("src/it/resources")
+		compileClasspath += sourceSets["main"].output + configurations["testRuntimeClasspath"]
+		runtimeClasspath += output + compileClasspath
+	}
+}
+
+val integrationTestImplementation: Configuration by configurations.getting {
+	extendsFrom(configurations.implementation.get())
+}
+
+//configurations {
+//	create("integrationTestImplementation")
+//	create("integrationTestRuntimeOnly")
+//	create("integrationTestRuntimeClasspath") {
+//		extendsFrom(configurations["runtimeClasspath"])
+//	}
+//	create("integrationTestCompileClasspath") {
+//		extendsFrom(configurations["compileClasspath"])
+//	}
+//}
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
@@ -29,9 +54,27 @@ dependencies {
 	annotationProcessor("org.projectlombok:lombok:1.18.38")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	integrationTestImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+
 }
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+
+
+val integrationTest = tasks.register<Test>("integrationTest") {
+	description = "Runs integration tests."
+	group = "verification"
+	testClassesDirs = sourceSets["integrationTest"].output.classesDirs
+	classpath = sourceSets["integrationTest"].runtimeClasspath
+	shouldRunAfter(tasks.test)
+	useJUnitPlatform()
+}
+
+tasks.check {
+	dependsOn(integrationTest)
 }
