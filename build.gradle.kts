@@ -37,11 +37,14 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-hateoas")
 	implementation("com.fasterxml.jackson.core:jackson-databind")
 	implementation("org.apache.commons:commons-collections4:4.1")
+	implementation("org.springframework.boot:spring-boot-starter-amqp")
 
 	compileOnly("org.projectlombok:lombok:1.18.38")
 	annotationProcessor("org.projectlombok:lombok:1.18.38")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
+
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.springframework.amqp:spring-rabbit-test")
 	integrationTestImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
