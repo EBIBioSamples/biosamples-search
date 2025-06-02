@@ -31,17 +31,6 @@ val integrationTestImplementation: Configuration by configurations.getting {
 	extendsFrom(configurations.implementation.get())
 }
 
-//configurations {
-//	create("integrationTestImplementation")
-//	create("integrationTestRuntimeOnly")
-//	create("integrationTestRuntimeClasspath") {
-//		extendsFrom(configurations["runtimeClasspath"])
-//	}
-//	create("integrationTestCompileClasspath") {
-//		extendsFrom(configurations["compileClasspath"])
-//	}
-//}
-
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
@@ -49,6 +38,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-hateoas")
 	implementation("com.fasterxml.jackson.core:jackson-databind")
 	implementation("org.apache.commons:commons-collections4:4.1")
+
 //	implementation("com.google.guava:guava:33.4.8-jre")
 	compileOnly("org.projectlombok:lombok:1.18.38")
 	annotationProcessor("org.projectlombok:lombok:1.18.38")
@@ -63,8 +53,6 @@ dependencies {
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
-
-
 
 val integrationTest = tasks.register<Test>("integrationTest") {
 	description = "Runs integration tests."
