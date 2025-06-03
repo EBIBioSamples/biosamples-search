@@ -32,7 +32,7 @@ public class FacetService {
     Query esSearchQuery = QueryHelper.getSearchQuery(searchQuery);
     Map<String, Aggregation> aggregations = getAggregations(searchQuery);
     NativeQuery query = getEsNativeQuery(esSearchQuery, aggregations);
-    return searchForSamplePage(query);
+    return retrieveFacets(query);
   }
 
   private Map<String, Aggregation> getAggregations(SearchQuery searchQuery) {
@@ -55,7 +55,7 @@ public class FacetService {
     return builder.build();
   }
 
-  private List<Facet> searchForSamplePage(NativeQuery query) {
+  private List<Facet> retrieveFacets(NativeQuery query) {
     log.info("Generated Elasticsearch Query: {}", query.getAggregations().toString());
     SearchHits<Sample> hits = elasticsearchOperations.search(query, Sample.class);
     List<Facet> facets = new ArrayList<>();

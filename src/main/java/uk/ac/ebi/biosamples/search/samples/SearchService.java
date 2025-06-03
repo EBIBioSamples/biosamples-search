@@ -40,9 +40,9 @@ public class SearchService {
         Sort.by("update").descending());
   }
 
-  private NativeQuery getEsNativeQuery(PageRequest page, Query searchQuery) {
+  private NativeQuery getEsNativeQuery(PageRequest page, Query esSearchQuery) {
     return NativeQuery.builder()
-        .withQuery(searchQuery)
+        .withQuery(esSearchQuery)
         .withPageable(page)
         .withSort(page.getSort())
         .build();

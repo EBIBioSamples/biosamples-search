@@ -1,4 +1,4 @@
-package uk.ac.ebi.biosamples.search.samples;
+package uk.ac.ebi.biosamples.search.index;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import uk.ac.ebi.biosamples.search.samples.Sample;
+import uk.ac.ebi.biosamples.search.samples.SamplesRepository;
 
 import java.io.IOException;
 import java.io.InputStream;

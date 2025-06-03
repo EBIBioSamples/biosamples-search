@@ -12,8 +12,11 @@ public class SearchQuery {
   private final String text;
   private final List<SearchFilter> filters;
 
-  private final String cursor;
   private final Integer page;
   private final Integer size;
-  private final String[] sort;
+  private final String[] sort; //allways add update + accession
+
+//  private final String scrollId;
+//  private final String scrollAfter;
+//  private final List<String> facets;
 }
