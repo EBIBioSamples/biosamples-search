@@ -1,0 +1,42 @@
+// https://www.baeldung.com/spring-boot-grpc
+// https://docs.spring.io/spring-grpc/reference/getting-started.html
+//
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "uk.ac.ebi.biosamples.search";
+option java_outer_classname = "SearchApi";
+option objc_class_prefix = "BSD";
+
+package biosamples.search;
+
+service Search {
+  rpc searchSamples(SearchRequest) returns (SearchResponse) {}
+  rpc getFacets(SearchRequest) returns (Facet) {}
+  rpc streamSamples(SearchRequest) returns (stream SearchResponse) {}
+}
+
+message SearchRequest {
+  string text = 1;
+  repeated SearchFilter filters = 2;
+  Page page = 3;
+}
+
+message SearchResponse {
+
+}
+
+message SearchFilter {
+
+}
+
+message Page {
+  int32 size = 1;
+  int32 number = 2;
+  int32 totalElements = 3;
+  int32 totalPages = 4;
+}
+
+message Facet {
+
+}
