@@ -1,10 +1,10 @@
 // https://www.baeldung.com/spring-boot-grpc
 // https://docs.spring.io/spring-grpc/reference/getting-started.html
-//
+// https://grpc.io/docs/languages/java/basics/
 syntax = "proto3";
 
 option java_multiple_files = true;
-option java_package = "uk.ac.ebi.biosamples.search";
+option java_package = "uk.ac.ebi.biosamples.search.grpc";
 option java_outer_classname = "SearchApi";
 option objc_class_prefix = "BSD";
 
@@ -23,7 +23,7 @@ message SearchRequest {
 }
 
 message SearchResponse {
-
+  repeated string accessions = 1;
 }
 
 message SearchFilter {

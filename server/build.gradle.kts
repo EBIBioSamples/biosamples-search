@@ -23,6 +23,8 @@ val integrationTestImplementation: Configuration by configurations.getting {
 	extendsFrom(configurations.implementation.get())
 }
 
+extra["springGrpcVersion"] = "0.8.0"
+
 dependencies {
 	implementation(project(":proto"))
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -33,15 +35,26 @@ dependencies {
 	implementation("org.apache.commons:commons-collections4:4.1")
 	implementation("org.springframework.boot:spring-boot-starter-amqp")
 
+	implementation("io.grpc:grpc-services")
+	implementation("org.springframework.grpc:spring-grpc-spring-boot-starter")
+
 	compileOnly("org.projectlombok:lombok:1.18.38")
 	annotationProcessor("org.projectlombok:lombok:1.18.38")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.springframework.grpc:spring-grpc-test")
 	testImplementation("org.springframework.amqp:spring-rabbit-test")
 	integrationTestImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
+
+dependencyManagement {
+	imports {
+		mavenBom("org.springframework.grpc:spring-grpc-dependencies:${property("springGrpcVersion")}")
+	}
+}
+
 
 tasks.withType<Test> {
 	useJUnitPlatform()
