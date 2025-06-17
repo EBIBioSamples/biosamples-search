@@ -29,7 +29,7 @@ deploy_primary_dev:
   variables:
     ENVIRONMENT_NAME: dev
   environment:
-    name: primary_hl_dev
+    name: primary
     url: https://wwwdev.ebi.ac.uk/biosamples/search
   only:
     - dev
@@ -58,6 +58,7 @@ deploy_primary_dev:
   variables:
     K8S_NAMESPACE: ${K8S_NAMESPACE_PREFIX}-${ENVIRONMENT_NAME}
   script:
+    - echo $K8S_NAMESPACE
     - kubectl config set-context --current --namespace=${K8S_NAMESPACE}
     - kubectl delete secret $DOCKER_PULL_SECRET || true
     - kubectl create secret docker-registry $DOCKER_PULL_SECRET \
