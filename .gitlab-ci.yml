@@ -1,0 +1,72 @@
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_TAG: $CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
+  DOCKER_IMAGE_NAME: $CI_REGISTRY_IMAGE:$DOCKER_TAG
+  DOCKER_PULL_SECRET: docker-registry-secret
+  K8S_NAMESPACE_PREFIX: biosamples
+  # take from variable or read from kubectl
+#  K8S_CLUSTER_URL: http://hx-rke-wp-webadmin-17-worker-1.caas.ebi.ac.uk
+  APP_NAME: $CI_PROJECT_NAME
+
+stages:
+  - build
+  - deploy
+
+build_docker_image:
+  stage: build
+  image: docker:27
+  services:
+    - docker:27-dind
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login --username "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    - docker build -t $DOCKER_IMAGE_NAME .
+    - docker push $DOCKER_IMAGE_NAME
+  after_script:
+    - docker logout ${CI_REGISTRY}
+
+#deploy_primary_dev:
+#  variables:
+#    ENVIRONMENT_NAME: dev
+#  environment:
+#    name: primary_hl_dev
+#    url: https://wwwdev.ebi.ac.uk/biosamples/checklist-editor
+#  only:
+#    - dev
+#    - main
+#  when: manual
+#  extends: .kube_deploy_script
+#
+#deploy_fallback_dev:
+#  variables:
+#    ENVIRONMENT_NAME: dev
+#  environment:
+#    name: fallback_hx_dev
+#    url: https://wwwdev.ebi.ac.uk/biosamples/checklist-editor
+#  only:
+#    - dev
+#    - main
+#  when: manual
+#  extends: .kube_deploy_script
+#
+#.kube_deploy_script:
+#  stage: deploy
+#  image: dtzar/helm-kubectl:3.16
+#  tags: ["dind"]
+#  services:
+#    - docker:27-dind
+#  variables:
+#    K8S_NAMESPACE: ${K8S_NAMESPACE_PREFIX}-${ENVIRONMENT_NAME}
+#  script:
+#    - kubectl config set-context --current --namespace=${K8S_NAMESPACE}
+#    - kubectl delete secret $DOCKER_PULL_SECRET || true
+#    - kubectl create secret docker-registry $DOCKER_PULL_SECRET \
+#              --docker-server=$CI_REGISTRY \
+#              --docker-username=$CI_REGISTRY_USER \
+#              --docker-password=$CI_REGISTRY_PASSWORD
+#    - helm upgrade \
+#                   --install $APP_NAME ./chart \
+#                   --values ./chart/values-${ENVIRONMENT_NAME}.yaml \
+#                   --set image.repository=$CI_REGISTRY_IMAGE \
+#                   --set image.tag=$DOCKER_TAG \
+#                   --set "imagePullSecrets[0].name=$DOCKER_PULL_SECRET"
