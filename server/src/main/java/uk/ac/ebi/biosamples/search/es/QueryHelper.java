@@ -4,6 +4,8 @@ import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchAllQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import uk.ac.ebi.biosamples.search.samples.SearchQuery;
 import uk.ac.ebi.biosamples.search.samples.filter.SearchFilter;
 
@@ -22,18 +24,18 @@ public class QueryHelper {
 
   private static Query getTextMatchQuery(SearchQuery searchQuery) {
     String searchText = searchQuery.getText();
-    return MatchQuery.of(m -> m
-        .field("sample_full_text")
-        .query(searchText)
-    )._toQuery();
+    return StringUtils.hasText(searchText) ?
+        MatchQuery.of(m -> m.field("sample_full_text").query(searchText))._toQuery() :
+        MatchAllQuery.of(m -> m)._toQuery();
   }
 
   private static Query getFilterQuery(SearchQuery searchQuery) {
-    List<Query> filterQueries = searchQuery.getFilters().stream()
-        .map(SearchFilter::getQuery).toList();
-    if (filterQueries.isEmpty()) {
+    if (CollectionUtils.isEmpty(searchQuery.getFilters())) {
       return MatchAllQuery.of(m -> m)._toQuery();
     }
+
+    List<Query> filterQueries = searchQuery.getFilters().stream()
+        .map(SearchFilter::getQuery).toList();
     return BoolQuery.of(b -> b.must(filterQueries))._toQuery();
   }
 

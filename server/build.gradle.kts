@@ -46,6 +46,7 @@ dependencies {
 	testImplementation("org.springframework.grpc:spring-grpc-test")
 	testImplementation("org.springframework.amqp:spring-rabbit-test")
 	integrationTestImplementation("org.springframework.boot:spring-boot-starter-test")
+	integrationTestImplementation("org.testcontainers:elasticsearch:1.21.1")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

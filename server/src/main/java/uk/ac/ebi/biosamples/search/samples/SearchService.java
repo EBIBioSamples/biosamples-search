@@ -15,6 +15,11 @@ import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.biosamples.search.es.QueryHelper;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -34,22 +39,30 @@ public class SearchService {
   }
 
   private PageRequest getPage(SearchQuery searchQuery) {
-    return PageRequest.of(
-        searchQuery.getPage(),
-        searchQuery.getSize(),
-        Sort.by("update").descending());
+    List<Sort.Order> sortOrders = getSortOrders(searchQuery);
+    return PageRequest.of(searchQuery.getPage(), searchQuery.getSize(), Sort.by(sortOrders));
+  }
+
+  private List<Sort.Order> getSortOrders(SearchQuery searchQuery) {
+    Stream<Sort.Order> userDefinedSortStream =
+        (searchQuery.getSort() == null || searchQuery.getSort().isEmpty()) ? Stream.empty()
+            : searchQuery.getSort().stream().map(s -> new Sort.Order(s.direction(), s.field()));
+    Stream<Sort.Order> defaultSortStream = Stream.of(
+        Sort.Order.desc("update"),
+        Sort.Order.asc("accession.keyword")
+    );
+    return Stream.concat(userDefinedSortStream, defaultSortStream).toList();
   }
 
   private NativeQuery getEsNativeQuery(PageRequest page, Query esSearchQuery) {
     return NativeQuery.builder()
         .withQuery(esSearchQuery)
         .withPageable(page)
-        .withSort(page.getSort())
         .build();
   }
 
   private SearchPage<Sample> searchForSamplePage(NativeQuery query) {
-    log.info("Generated Elasticsearch Query: {}", query.getQuery().toString());
+    log.info("Generated Elasticsearch Query: {}", query.getQuery());
     SearchHits<Sample> hits = elasticsearchOperations.search(query, Sample.class);
     return SearchHitSupport.searchPageFor(hits, query.getPageable());
   }

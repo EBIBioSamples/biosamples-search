@@ -1,0 +1,53 @@
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: elasticsearch-cluster
+spec:
+  version: 8.12.0
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: true
+  nodeSets:
+    - name: default
+      count: 3
+      config:
+        node.roles: [ "master", "data", "ingest" ]
+        node.store.allow_mmap: false
+        cluster.routing.allocation.awareness.attributes: k8s_node_name
+        cluster.name: elasticsearch-cluster
+        # Optional: Set default shard and replica settings
+        # index.number_of_shards: 3
+        # index.number_of_replicas: 1
+      podTemplate:
+        metadata:
+          labels:
+            app: elasticsearch
+        spec:
+          containers:
+            - name: elasticsearch
+              resources:
+                requests:
+                  memory: 12Gi
+                  cpu: 3
+                limits:
+                  memory: 16Gi
+                  cpu: 4
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 100
+                  podAffinityTerm:
+                    labelSelector:
+                      matchLabels:
+                        elasticsearch.k8s.elastic.co/cluster-name: elasticsearch-cluster
+                    topologyKey: kubernetes.io/hostname
+      volumeClaimTemplates:
+        - metadata:
+            name: elasticsearch-data
+          spec:
+            accessModes: [ "ReadWriteOnce" ]
+            resources:
+              requests:
+                storage: 100Gi
+            storageClassName: local-storage

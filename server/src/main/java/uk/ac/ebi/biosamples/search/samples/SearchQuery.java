@@ -2,6 +2,7 @@ package uk.ac.ebi.biosamples.search.samples;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.data.domain.Sort;
 import uk.ac.ebi.biosamples.search.samples.filter.SearchFilter;
 
 import java.util.List;
@@ -14,7 +15,7 @@ public class SearchQuery {
 
   private final Integer page;
   private final Integer size;
-  private final String[] sort; //allways add update + accession
+  private final List<SortOrder> sort; //allways add update + accession
 
 //  private final String scrollId;
 //  private final String scrollAfter;

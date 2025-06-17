@@ -28,4 +28,5 @@ class SearchServiceTest {
     assertThat(samples.getTotalElements()).isEqualTo(0);
   }
 
+
 }
