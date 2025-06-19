@@ -40,6 +40,16 @@ spec:
           {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: SPRING_ELASTICSEARCH_URIS
+              value: http://elasticsearch-cluster-es-http:9200
+            - name: SPRING_ELASTICSEARCH_USERNAME
+              value: elastic
+            - name: SPRING_ELASTICSEARCH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: elasticsearch-cluster-es-elastic-user
+                  key: elastic
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
