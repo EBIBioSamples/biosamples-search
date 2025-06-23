@@ -1,9 +1,6 @@
 package uk.ac.ebi.biosamples.search.index;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
@@ -14,22 +11,22 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitConfig {
   public static final String INDEXING_QUEUE = "biosamples.tobeindexed.solr";
   public static final String INDEXING_EXCHANGE = "biosamples.forindexing.solr";
-  public static final String REINDEXING_QUEUE = "biosamples.reindex.solr";
+  public static final String REINDEXING_QUEUE = "biosamples.reindex.elasticsearch";
   public static final String REINDEXING_EXCHANGE = "biosamples.reindex.solr";
   public static final String REINDEXING_ROUTING_KEY = "biosamples.reindex.solr";
 
   @Bean
   Queue queue() {
-    return new Queue(REINDEXING_QUEUE, false);
+    return new Queue(REINDEXING_QUEUE, true);
   }
 
   @Bean
-  TopicExchange exchange() {
-    return new TopicExchange(REINDEXING_EXCHANGE);
+  DirectExchange exchange() {
+    return new DirectExchange(REINDEXING_EXCHANGE);
   }
 
   @Bean
-  Binding binding(Queue queue, TopicExchange exchange) {
+  Binding binding(Queue queue, DirectExchange exchange) {
     return BindingBuilder.bind(queue).to(exchange).with(REINDEXING_ROUTING_KEY);
   }
 
