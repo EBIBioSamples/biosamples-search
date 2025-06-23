@@ -1,0 +1,3 @@
+search:
+  rabbitmq:
+    host: wp-np2-40

@@ -50,6 +50,19 @@ spec:
                 secretKeyRef:
                   name: elasticsearch-cluster-es-elastic-user
                   key: elastic
+            - name: SPRING_RABBITMQ_HOST
+              value: {{ .Values.search.rabbitmq.host }}
+            - name: SPRING_RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-user
+                  key: username
+            - name: SPRING_RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-user
+                  key: password
+
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
