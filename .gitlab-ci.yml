@@ -18,7 +18,7 @@ build_and_package:
   stage: build
   image: ${CI_REGISTRY_IMAGE}/gradle:8.12-jdk21
   script:
-    - gradle clean build -x test -x check
+    - gradle clean build publish -x test -x check
 
 build_docker_image:
   stage: package
