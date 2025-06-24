@@ -13,6 +13,12 @@ stages:
   - build
   - deploy
 
+build_and_package:
+  stage: build
+  image: gradle:8.14-jdk21
+  script:
+    - gradle clean build publish
+
 build_docker_image:
   stage: build
   image: docker:27
