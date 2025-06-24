@@ -16,7 +16,7 @@ stages:
 
 build_and_package:
   stage: build
-  image: biosamples-search/gradle:8.12-jdk21
+  image: ${CI_REGISTRY_IMAGE}/gradle:8.12-jdk21
   script:
     - gradle clean build -x test -x check
 
@@ -58,7 +58,7 @@ deploy_primary_dev:
 #
 .kube_deploy_script:
   stage: deploy
-  image: dtzar/helm-kubectl:3.16
+  image: ${CI_REGISTRY_IMAGE}/dtzar/helm-kubectl:3.16
   tags: ["dind"]
   services:
     - docker:27-dind
