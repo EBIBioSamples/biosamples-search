@@ -1,6 +1,12 @@
 plugins {
     java
     id("com.google.protobuf") version "0.9.5"
+    `maven-publish`
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 dependencies {
@@ -30,7 +36,25 @@ protobuf {
     }
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+publishing {
+    publications {
+        create<MavenPublication>("library") {
+            from(components["java"])
+        }
+    }
+    repositories {
+        maven {
+            name = "GitLab"
+            url = uri("https://gitlab.ebi.ac.uk/api/v4/projects/5516/packages/maven")
+
+            credentials(HttpHeaderCredentials::class) {
+                name = "Job-Token"
+                value = System.getenv("CI_JOB_TOKEN")
+            }
+
+            authentication {
+                create<HttpHeaderAuthentication>("header")
+            }
+        }
+    }
 }
