@@ -16,7 +16,7 @@ stages:
 
 build_and_package:
   stage: build
-  image: gradle:8.12-jdk21
+  image: biosamples-search/gradle:8.12-jdk21
   script:
     - gradle clean build -x test -x check
 
