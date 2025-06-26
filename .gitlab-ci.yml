@@ -11,7 +11,6 @@ variables:
 
 stages:
   - build
-  - package
   - deploy
 
 build_and_package:
@@ -21,7 +20,7 @@ build_and_package:
     - gradle clean build publish -x test -x check
 
 build_docker_image:
-  stage: package
+  stage: build
   image: docker:27
   services:
     - docker:27-dind
