@@ -24,6 +24,7 @@ message SearchRequest {
 
 message SearchResponse {
   repeated string accessions = 1;
+  Page page = 2;
 }
 
 message SearchFilter {

@@ -1,4 +1,4 @@
-FROM gradle:8.12-jdk21 AS builder
+FROM ${CI_REGISTRY_IMAGE}/gradle:8.12-jdk21 AS builder
 
 WORKDIR /app
 
