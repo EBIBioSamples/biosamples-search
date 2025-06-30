@@ -16,9 +16,88 @@ service Search {
   rpc streamSamples(SearchRequest) returns (stream SearchResponse) {}
 }
 
+message Filter {
+  oneof value {
+    AccessionFilter accession = 1;
+    SraAccessionFilter sraAccession = 2;
+    NameFilter name = 3;
+    WebinIdFilter webin = 4;
+    DateRangeFilter dateRange = 5;
+    AttributeFilter attribute = 6;
+    RelationshipFilter relationship = 7;
+    ExternalRefFilter external = 8;
+    StructuredDataFilter structuredData = 9;
+  }
+}
+
+message AccessionFilter {
+  string accession = 1;
+}
+
+message SraAccessionFilter {
+  string accession = 1;
+}
+
+message NameFilter {
+  string name = 1;
+}
+
+message WebinIdFilter {
+  string webinId = 1;
+}
+
+message DateRangeFilter {
+  enum DateField {
+    UPDATE = 0;
+    CREATE = 1;
+    RELEASE = 2;
+    SUBMITTED = 3;
+  }
+  DateField field = 1;;
+  string from = 2;
+  string to = 3;
+}
+
+message AttributeFilter {
+  string field = 1;
+  repeated string values = 2;
+}
+
+message RelationshipFilter {
+  string relType = 1;
+  string source = 2;
+  string target = 3;
+}
+
+message ExternalRefFilter {
+  string archive = 1;
+  string accession = 2;
+}
+
+message StructuredDataFilter {
+  string type = 1;
+  string field = 2;
+  string value = 3;
+}
+
+message Page {
+  int32 size = 1;
+  int32 number = 2;
+  int32 totalElements = 3;
+  int32 totalPages = 4;
+  string searchAfter = 5;
+}
+
+message Facet {
+  string type = 1;
+  string field = 2;
+  int64 count = 3;
+  map<string, int64> buckets = 4;
+}
+
 message SearchRequest {
   string text = 1;
-  repeated SearchFilter filters = 2;
+  repeated Filter filters = 2;
   Page page = 3;
 }
 
@@ -27,17 +106,6 @@ message SearchResponse {
   Page page = 2;
 }
 
-message SearchFilter {
-
-}
-
-message Page {
-  int32 size = 1;
-  int32 number = 2;
-  int32 totalElements = 3;
-  int32 totalPages = 4;
-}
-
-message Facet {
-
+message FacetResponse {
+  repeated Facet facets = 1;
 }
