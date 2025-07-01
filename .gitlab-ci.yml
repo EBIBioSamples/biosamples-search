@@ -5,8 +5,6 @@ variables:
   DOCKER_IMAGE_NAME: $CI_REGISTRY_IMAGE:$DOCKER_TAG
   DOCKER_PULL_SECRET: docker-registry-secret
   K8S_NAMESPACE_PREFIX: biosamples
-  # take from variable or read from kubectl
-#  K8S_CLUSTER_URL: http://hx-rke-wp-webadmin-17-worker-1.caas.ebi.ac.uk
   APP_NAME: $CI_PROJECT_NAME
 
 stages:
@@ -15,7 +13,7 @@ stages:
 
 build_and_package:
   stage: build
-  image: ${CI_REGISTRY_IMAGE}/gradle:8.12-jdk21
+  image: ${CI_REGISTRY_IMAGE}/gradle:8.14-jdk24
   script:
     - gradle clean build publish -x test -x check
 

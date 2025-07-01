@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 @RequiredArgsConstructor
 public class IndexingListener {
-  private static final int BATCH_SIZE = 200;
+  private static final int BATCH_SIZE = 1000;
   private static final BlockingQueue<Sample> INDEXING_QUEUE = new LinkedBlockingQueue<>();
   private final SamplesRepository samplesRepository;
   private final ObjectMapper objectMapper;
@@ -38,7 +38,7 @@ public class IndexingListener {
   }
 
   @Scheduled(initialDelay = 60, fixedDelay = 60, timeUnit = TimeUnit.SECONDS)
-  private void indexSamplesInBatches() {
+  void indexSamplesInBatches() {
     while (INDEXING_QUEUE.size() >= BATCH_SIZE) {
       indexBatch();
     }
@@ -54,8 +54,8 @@ public class IndexingListener {
 
   @PreDestroy
   private void indexRemaining() {
-    log.info("Indexing {} samples and flushing indexing cache", INDEXING_QUEUE.size());
     if (!INDEXING_QUEUE.isEmpty()) {
+      log.info("Indexing {} samples and flushing indexing cache", INDEXING_QUEUE.size());
       List<Sample> samples = new ArrayList<>();
       INDEXING_QUEUE.drainTo(samples);
       samplesRepository.saveAll(samples);

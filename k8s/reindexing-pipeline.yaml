@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: reindexing-pipeline
+spec:
+  template:
+    spec:
+      containers:
+        - name: biosamples
+          image: biosamples:latest
+          command: ["java", "-jar", "pipelines-reindex-5.3.12-SNAPSHOT.jar"]
+          env:
+            - name: BIOSAMPLES_CLIENT_URI
+              value: https://wwwdev.ebi.ac.uk/biosamples
+            - name: SPRING_DATA_MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: biosamples-mongodb
+                  key: connection-string
+            - name: SPRING_RABBITMQ_HOST
+              value: wp-np2-40.ebi.ac.uk
+            - name: SPRING_RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-user
+                  key: username
+            - name: SPRING_RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-user
+                  key: password
+      restartPolicy: Never
+  backoffLimit: 3
