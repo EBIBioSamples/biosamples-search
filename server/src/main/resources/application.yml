@@ -5,6 +5,11 @@ spring:
     username: elastic
     password: elastic
     uris: http://localhost:9200
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
   jackson:
     deserialization:
       FAIL_ON_UNKNOWN_PROPERTIES: false

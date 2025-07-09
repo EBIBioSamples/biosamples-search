@@ -22,7 +22,7 @@ class SearchServiceTest {
 
 
   @Test
-  void sampleSearchShouldReturnPaginatedSampleList() {
+  void sampleSearch_shouldReturnPaginatedSampleList() {
     when(samplesRepository.findAll(any(Pageable.class))).thenReturn(Page.empty());
     Page<Sample> samples = samplesService.searchSamples();
     assertThat(samples.getTotalElements()).isEqualTo(0);

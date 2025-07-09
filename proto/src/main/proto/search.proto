@@ -12,7 +12,7 @@ package biosamples.search;
 
 service Search {
   rpc searchSamples(SearchRequest) returns (SearchResponse) {}
-  rpc getFacets(SearchRequest) returns (Facet) {}
+  rpc getFacets(SearchRequest) returns (FacetResponse) {}
   rpc streamSamples(SearchRequest) returns (stream SearchResponse) {}
 }
 
@@ -53,7 +53,7 @@ message DateRangeFilter {
     RELEASE = 2;
     SUBMITTED = 3;
   }
-  DateField field = 1;;
+  DateField field = 1;
   string from = 2;
   string to = 3;
 }
@@ -80,14 +80,6 @@ message StructuredDataFilter {
   string value = 3;
 }
 
-message Page {
-  int32 size = 1;
-  int32 number = 2;
-  int32 totalElements = 3;
-  int32 totalPages = 4;
-  string searchAfter = 5;
-}
-
 message Facet {
   string type = 1;
   string field = 2;
@@ -98,12 +90,26 @@ message Facet {
 message SearchRequest {
   string text = 1;
   repeated Filter filters = 2;
-  Page page = 3;
+  int32 size = 3;
+  int32 number = 4;
+  string searchAfter = 5;
+  repeated string sort = 6;
 }
 
 message SearchResponse {
   repeated string accessions = 1;
-  Page page = 2;
+  int32 size = 2;
+  int32 number = 3;
+  int64 totalElements = 4;
+  int32 totalPages = 5;
+  string searchAfter = 6;
+  repeated string sort = 7;
+}
+
+message FacetRequest {
+  string text = 1;
+  repeated Filter filters = 2;
+  repeated string facets = 3;
 }
 
 message FacetResponse {
