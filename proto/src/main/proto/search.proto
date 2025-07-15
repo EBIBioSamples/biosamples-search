@@ -12,8 +12,8 @@ package biosamples.search;
 
 service Search {
   rpc searchSamples(SearchRequest) returns (SearchResponse) {}
-  rpc getFacets(SearchRequest) returns (FacetResponse) {}
-  rpc streamSamples(SearchRequest) returns (stream SearchResponse) {}
+  rpc getFacets(FacetRequest) returns (FacetResponse) {}
+  rpc streamSamples(StreamRequest) returns (stream StreamResponse) {}
 }
 
 message Filter {
@@ -106,10 +106,23 @@ message SearchResponse {
   repeated string sort = 7;
 }
 
+message StreamRequest {
+  string text = 1;
+  repeated Filter filters = 2;
+  repeated string searchAfter = 5;
+  repeated string sort = 6;
+}
+
+message StreamResponse {
+  string accession = 1;
+  repeated string searchAfter = 2;
+}
+
 message FacetRequest {
   string text = 1;
   repeated Filter filters = 2;
   repeated string facets = 3;
+  int32 size = 4;
 }
 
 message FacetResponse {

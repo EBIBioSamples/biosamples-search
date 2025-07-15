@@ -4,6 +4,7 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.biosamples.search.grpc.*;
@@ -57,24 +58,36 @@ public class SampleServiceGrpc extends SearchGrpc.SearchImplBase {
   }
 
   @Override
-  public void streamSamples(SearchRequest searchRequest, StreamObserver<SearchResponse> responseObserver) {
-    log.info("Calling GRPC method stream samples.................");
-
-    // todo validate streaming params
-
+  public void streamSamples(StreamRequest searchRequest, StreamObserver<StreamResponse> responseObserver) {
+    log.info("Start of stream for samples................");
     SearchQuery searchQuery = SearchQueryMapper.mapGrpcSearchQuery(searchRequest);
-    SearchPage<Sample> samplePage = searchService.search(searchQuery);
-    SearchResponse response = populateSearchResponse(samplePage);
-
-    responseObserver.onNext(response);
+    List<String> searchAfter = searchQuery.getSearchAfter() ;
+    SearchPage<Sample> samplePage = null;
+    while (true) {
+      searchQuery = searchQuery.toBuilder().searchAfter(searchAfter).build();
+      samplePage = searchService.search(searchQuery);
+      if (samplePage.getContent().isEmpty()) {
+        break;
+      }
+      for (SearchHit<Sample> sample : samplePage.getContent()) {
+        responseObserver.onNext(
+            StreamResponse.newBuilder()
+                .setAccession(sample.getContent().getAccession())
+                .addSearchAfter(sample.getContent().getUpdate().toString())
+                .addSearchAfter(sample.getContent().getAccession())
+                .build());
+        searchAfter = List.of(sample.getContent().getUpdate().toString(), sample.getContent().getAccession());
+      }
+    }
+    log.info("End of stream for samples................");
     responseObserver.onCompleted();
   }
 
   @Override
-  public void getFacets(SearchRequest searchRequest, StreamObserver<FacetResponse> responseObserver) {
+  public void getFacets(FacetRequest facetRequest, StreamObserver<FacetResponse> responseObserver) {
     log.info("Calling GRPC method get facets.................");
 
-    SearchQuery searchQuery = SearchQueryMapper.mapGrpcSearchQuery(searchRequest);
+    SearchQuery searchQuery = SearchQueryMapper.mapGrpcSearchQuery(facetRequest);
     List<uk.ac.ebi.biosamples.search.samples.facet.Facet> facets = facetService.getFacets(searchQuery);
     FacetResponse response = populateFacetResponse(facets);
 

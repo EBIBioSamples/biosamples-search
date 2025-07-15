@@ -11,9 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchPage;
-import uk.ac.ebi.biosamples.search.grpc.FacetResponse;
-import uk.ac.ebi.biosamples.search.grpc.SearchRequest;
-import uk.ac.ebi.biosamples.search.grpc.SearchResponse;
+import uk.ac.ebi.biosamples.search.grpc.*;
 import uk.ac.ebi.biosamples.search.samples.facet.Facet;
 
 import java.time.Instant;
@@ -35,11 +33,15 @@ class SampleServiceGrpcTest {
   @Mock
   private StreamObserver<SearchResponse> searchResponseObserver;
   @Mock
+  private StreamObserver<StreamResponse> streamResponseObserver;
+  @Mock
   private StreamObserver<FacetResponse> facetResponseObserver;
   @Mock
   private SearchPage<Sample> mockSearchPage;
   @Captor
   private ArgumentCaptor<SearchResponse> searchResponseCaptor;
+  @Captor
+  private ArgumentCaptor<StreamResponse> streamResponseCaptor;
   @Captor
   private ArgumentCaptor<FacetResponse> facetResponseCaptor;
   private SampleServiceGrpc sampleServiceGrpc;
@@ -66,22 +68,22 @@ class SampleServiceGrpcTest {
 
   @Test
   void streamSamples_ShouldReturnValidResponse() {
-    SearchRequest request = createTestSearchRequest();
-    setupMockSearchPage();
+    StreamRequest request = createTestStreamRequest();
+    setupMockSearchPageForStreamResponse();
     when(searchService.search(any(SearchQuery.class))).thenReturn(mockSearchPage);
 
-    sampleServiceGrpc.streamSamples(request, searchResponseObserver);
+    sampleServiceGrpc.streamSamples(request, streamResponseObserver);
 
-    verify(searchResponseObserver).onNext(searchResponseCaptor.capture());
-    verify(searchResponseObserver).onCompleted();
+    verify(streamResponseObserver).onNext(streamResponseCaptor.capture());
+    verify(streamResponseObserver).onCompleted();
 
-    SearchResponse response = searchResponseCaptor.getValue();
-    assertSearchResponse(response);
+    StreamResponse response = streamResponseCaptor.getValue();
+    assertStreamResponse(response);
   }
 
   @Test
   void getFacets_ShouldReturnValidResponse() {
-    SearchRequest request = createTestSearchRequest();
+    FacetRequest request = createTestFacetRequest();
     List<Facet> mockFacets = createTestFacets();
     when(facetService.getFacets(any(SearchQuery.class))).thenReturn(mockFacets);
 
@@ -105,12 +107,24 @@ class SampleServiceGrpcTest {
         .build();
   }
 
+  private FacetRequest createTestFacetRequest() {
+    return FacetRequest.newBuilder()
+        .setText("test query")
+        .setSize(10)
+        .build();
+  }
+
+  private StreamRequest createTestStreamRequest() {
+    return StreamRequest.newBuilder()
+        .setText("test streaming query")
+        .build();
+  }
+
   private void setupMockSearchPage() {
     Sample testSample = Sample.builder().build();
-    testSample.accession = "TEST123";
+    testSample.setAccession("TEST123");
     testSample.setUpdate(Instant.now());
-
-    SearchHit<Sample> searchHit = new SearchHit<>("1", "1", null, 1.0f, null, null, null, null, null, null, testSample);
+    SearchHit<Sample> searchHit = getMockSearchHit(testSample);
 
     when(mockSearchPage.stream()).thenReturn(Stream.of(searchHit));
     when(mockSearchPage.getContent()).thenReturn(List.of(searchHit));
@@ -119,6 +133,19 @@ class SampleServiceGrpcTest {
     when(mockSearchPage.getTotalElements()).thenReturn(100L);
     when(mockSearchPage.getTotalPages()).thenReturn(10);
     when(mockSearchPage.getSort()).thenReturn(Sort.by("update"));
+  }
+
+  private void setupMockSearchPageForStreamResponse() {
+    Sample testSample = Sample.builder().build();
+    testSample.setAccession("TEST123");
+    testSample.setUpdate(Instant.now());
+    SearchHit<Sample> searchHit = getMockSearchHit(testSample);
+
+    when(mockSearchPage.getContent()).thenReturn(List.of(searchHit), List.of(searchHit), List.of());
+  }
+
+  private SearchHit<Sample> getMockSearchHit(Sample sample) {
+    return new SearchHit<>("1", "1", null, 1.0f, null, null, null, null, null, null, sample);
   }
 
   private List<Facet> createTestFacets() {
@@ -133,5 +160,10 @@ class SampleServiceGrpcTest {
     assertThat(response.getTotalElements()).isEqualTo(100L);
     assertThat(response.getTotalPages()).isEqualTo(10);
     assertThat(response.getSortList()).contains("update");
+  }
+
+  private void assertStreamResponse(StreamResponse response) {
+    assertThat(response.getAccession()).isNotBlank();
+    assertThat(response.getSearchAfterList().getFirst()).isInstanceOf(String.class);
   }
 }

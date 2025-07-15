@@ -1,6 +1,7 @@
 package uk.ac.ebi.biosamples.search.samples;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import io.netty.util.internal.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -13,9 +14,11 @@ import org.springframework.data.elasticsearch.core.SearchHitSupport;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import uk.ac.ebi.biosamples.search.es.QueryHelper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -35,12 +38,18 @@ public class SearchService {
     PageRequest pageRequest = getPage(searchQuery);
     Query esSearchQuery = QueryHelper.getSearchQuery(searchQuery);
     NativeQuery query = getEsNativeQuery(pageRequest, esSearchQuery);
+
+    if (!CollectionUtils.isEmpty(searchQuery.getSearchAfter())) {
+      query.setSearchAfter(Arrays.asList(searchQuery.getSearchAfter().toArray()));
+    }
+
     return searchForSamplePage(query);
   }
 
   private PageRequest getPage(SearchQuery searchQuery) {
     List<Sort.Order> sortOrders = getSortOrders(searchQuery);
-    return PageRequest.of(searchQuery.getPage(), searchQuery.getSize(), Sort.by(sortOrders));
+    int page = searchQuery.getSearchAfter() == null ? searchQuery.getPage() : 0;
+    return PageRequest.of(page, searchQuery.getSize(), Sort.by(sortOrders));
   }
 
   private List<Sort.Order> getSortOrders(SearchQuery searchQuery) {
