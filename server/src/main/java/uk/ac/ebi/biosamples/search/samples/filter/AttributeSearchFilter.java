@@ -3,19 +3,16 @@ package uk.ac.ebi.biosamples.search.samples.filter;
 import co.elastic.clients.elasticsearch._types.query_dsl.NestedQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 
 import java.util.List;
 
-@Builder
-@Getter
-@Jacksonized
-public final class AttributeSearchFilter implements SearchFilter {
-  private final String field;
-  private final List<String> values;
+public record AttributeSearchFilter(String field, List<String> values) implements SearchFilter {
 
+  @JsonIgnore
   public Query getQuery() {
     return NestedQuery.of(n -> n
         .path("characteristics")

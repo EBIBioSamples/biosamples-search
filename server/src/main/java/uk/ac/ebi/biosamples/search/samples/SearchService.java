@@ -48,8 +48,12 @@ public class SearchService {
 
   private PageRequest getPage(SearchQuery searchQuery) {
     List<Sort.Order> sortOrders = getSortOrders(searchQuery);
-    int page = searchQuery.getSearchAfter() == null ? searchQuery.getPage() : 0;
-    return PageRequest.of(page, searchQuery.getSize(), Sort.by(sortOrders));
+    int page = 0;
+    if (searchQuery.getSearchAfter() == null && searchQuery.getPage() != null) {
+      page = searchQuery.getPage();
+    }
+    int size = searchQuery.getSize() == null ? 10 : searchQuery.getSize();
+    return PageRequest.of(page, size, Sort.by(sortOrders));
   }
 
   private List<Sort.Order> getSortOrders(SearchQuery searchQuery) {

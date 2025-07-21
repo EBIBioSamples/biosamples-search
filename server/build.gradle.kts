@@ -71,6 +71,11 @@ val integrationTest = tasks.register<Test>("integrationTest") {
 	classpath = sourceSets["integrationTest"].runtimeClasspath
 	shouldRunAfter(tasks.test)
 	useJUnitPlatform()
+
+	// parallel execution has port binding issues
+	maxParallelForks = 1
+    forkEvery = 1
+
 }
 
 tasks.check {

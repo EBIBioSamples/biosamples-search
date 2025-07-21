@@ -2,14 +2,16 @@ package uk.ac.ebi.biosamples.search.model;
 
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.data.elasticsearch.annotations.*;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.InnerField;
+import org.springframework.data.elasticsearch.annotations.MultiField;
 
 @Data
 @Builder
 public class Attribute {
   @Field(type = FieldType.Keyword)
   private String key;
-//  @Field(type = FieldType.Keyword)
   @MultiField(
       mainField = @Field(type = FieldType.Text, name = "value"),
       otherFields = {

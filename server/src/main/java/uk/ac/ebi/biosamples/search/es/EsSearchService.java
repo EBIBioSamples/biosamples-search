@@ -39,10 +39,10 @@ public class EsSearchService {
 
 //    Query query = NativeQuery.builder()
 ////        .withAggregation("lastNames", Aggregation.of(a -> a
-////            .terms(ta -> ta.field("lastName").size(10))))
+////            .terms(ta -> ta.key("lastName").size(10))))
 //        .withQuery(q -> q
 //            .match(m -> m
-//                .field("accession")
+//                .key("accession")
 //                .query("SAMD00000001")
 //            )
 //        )

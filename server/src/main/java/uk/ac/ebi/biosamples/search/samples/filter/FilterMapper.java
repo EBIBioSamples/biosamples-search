@@ -14,7 +14,7 @@ public class FilterMapper {
       case RELATIONSHIP -> getRelationshipSearchFilter(grpcFilter.getRelationship());
       case EXTERNAL -> getExternalRefSearchFilter(grpcFilter.getExternal());
       case STRUCTUREDDATA -> getStructuredDataSearchFilter(grpcFilter.getStructuredData());
-      case VALUE_NOT_SET -> throw new IllegalArgumentException("Filter type not set");
+      case VALUE_NOT_SET -> throw new IllegalArgumentException("Filter dataType not set");
     };
   }
 

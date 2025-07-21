@@ -21,7 +21,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SamplesController {
   private final SearchService samplesService;
-  private final IndexingService indexingService;
   private final FacetService facetService;
 
   @GetMapping("/search")

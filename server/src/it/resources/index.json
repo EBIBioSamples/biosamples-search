@@ -1,0 +1,223 @@
+{
+  "properties": {
+    "sample_full_text": {
+      "type": "text"
+    },
+    "_class": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
+    },
+    "accession": {
+      "type": "text",
+      "copy_to": "sample_full_text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
+    },
+    "characteristics": {
+      "type": "nested",
+      "properties": {
+        "key": {
+          "type": "text",
+          "copy_to": "sample_full_text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "value": {
+          "type": "text",
+          "copy_to": "sample_full_text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        }
+      }
+    },
+    "create": {
+      "type": "date"
+    },
+    "externalReferences": {
+      "type": "nested",
+      "properties": {
+        "url": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        }
+      }
+    },
+    "name": {
+      "type": "text",
+      "copy_to": "sample_full_text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
+    },
+    "publications": {
+      "type": "nested",
+      "properties": {
+        "pubmed_id": {
+          "type": "text",
+          "copy_to": "sample_full_text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        }
+      }
+    },
+    "relationships": {
+      "type": "nested",
+      "properties": {
+        "source": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "target": {
+          "type": "text",
+          "copy_to": "sample_full_text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "type": {
+          "type": "text",
+          "copy_to": "sample_full_text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        }
+      }
+    },
+    "release": {
+      "type": "date"
+    },
+    "sraAccession": {
+      "type": "text",
+      "copy_to": "sample_full_text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
+    },
+    "status": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
+    },
+    "submitted": {
+      "type": "date"
+    },
+    "submittedVia": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
+    },
+    "taxId": {
+      "type": "long",
+      "copy_to": "sample_full_text"
+    },
+    "update": {
+      "type": "date"
+    },
+    "webinSubmissionAccountId": {
+      "type": "text",
+      "copy_to": "sample_full_text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
+    },
+    "domain": {
+      "type": "text",
+      "copy_to": "sample_full_text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
+    },
+    "structuredData": {
+      "type": "nested",
+      "properties": {
+        "dataType": {
+          "type": "text",
+          "copy_to": "sample_full_text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "key": {
+          "type": "text",
+          "copy_to": "sample_full_text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "value": {
+          "type": "text",
+          "copy_to": "sample_full_text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        }
+      }
+    }
+  }
+}

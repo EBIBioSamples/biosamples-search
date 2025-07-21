@@ -3,17 +3,10 @@ package uk.ac.ebi.biosamples.search.samples.filter;
 import co.elastic.clients.elasticsearch._types.query_dsl.NestedQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
-import lombok.Builder;
-import lombok.extern.jackson.Jacksonized;
 
 import java.util.List;
 
-@Builder
-@Jacksonized
-public final class StructuredDataSearchFilter implements SearchFilter {
-  private final String type;
-  private final String field;
-  private final String value;
+public record StructuredDataSearchFilter(String dataType, String key, String value) implements SearchFilter {
 
   public Query getQuery() {
     return NestedQuery.of(n -> n
@@ -23,16 +16,16 @@ public final class StructuredDataSearchFilter implements SearchFilter {
                 .must(
                     List.of(
                         TermQuery.of(t -> t
-                            .field("structuredData.type.keyword")
-                            .value(field)
+                            .field("structuredData.dataType.keyword")
+                            .value(dataType)
                         )._toQuery(),
                         TermQuery.of(t -> t
-                            .field("structuredData.field.keyword")
-                            .value(field)
+                            .field("structuredData.key.keyword")
+                            .value(key)
                         )._toQuery(),
                         TermQuery.of(t -> t
                             .field("structuredData.value.keyword")
-                            .value(field)
+                            .value(value)
                         )._toQuery()
                     )
                 )

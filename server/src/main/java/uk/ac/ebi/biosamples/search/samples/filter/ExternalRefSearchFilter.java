@@ -3,17 +3,13 @@ package uk.ac.ebi.biosamples.search.samples.filter;
 import co.elastic.clients.elasticsearch._types.query_dsl.NestedQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
-import lombok.Builder;
-import lombok.extern.jackson.Jacksonized;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.List;
 
-@Builder
-@Jacksonized
-public final class ExternalRefSearchFilter implements SearchFilter {
-  private final String archive;
-  private final String accession;
+public record ExternalRefSearchFilter(String archive, String accession) implements SearchFilter {
 
+  @JsonIgnore
   public Query getQuery() {
     return NestedQuery.of(n -> n
         .path("externalReferences")

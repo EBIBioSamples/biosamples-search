@@ -16,7 +16,7 @@ public class RelationshipFacet {
     return Aggregation.of(a -> a
         .nested(n -> n.path("relationships"))
         .aggregations("by_key", a1 -> a1
-            .terms(t -> t.field("relationships.type.keyword"))
+            .terms(t -> t.field("relationships.dataType.keyword"))
         )
     );
   }

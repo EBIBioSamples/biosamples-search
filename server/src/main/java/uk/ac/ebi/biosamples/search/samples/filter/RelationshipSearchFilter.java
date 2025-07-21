@@ -3,18 +3,13 @@ package uk.ac.ebi.biosamples.search.samples.filter;
 import co.elastic.clients.elasticsearch._types.query_dsl.NestedQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
-import lombok.Builder;
-import lombok.extern.jackson.Jacksonized;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.List;
 
-@Builder
-@Jacksonized
-public final class RelationshipSearchFilter implements SearchFilter {
-  private final String relType;
-  private final String source;
-  private final String target;
+public record RelationshipSearchFilter(String relType, String source, String target) implements SearchFilter {
 
+  @JsonIgnore
   public Query getQuery() {
     return NestedQuery.of(n -> n
         .path("relationships")
@@ -23,16 +18,16 @@ public final class RelationshipSearchFilter implements SearchFilter {
                 .must(
                     List.of(
                         TermQuery.of(t -> t
-                            .field("relationships.relType.keyword")
+                            .field("relationships.type.keyword")
                             .value(relType)
                         )._toQuery(),
                         TermQuery.of(t -> t
                             .field("relationships.source.keyword")
-                            .value(relType)
+                            .value(source)
                         )._toQuery(),
                         TermQuery.of(t -> t
                             .field("relationships.target.keyword")
-                            .value(relType)
+                            .value(target)
                         )._toQuery()
                     )
                 )

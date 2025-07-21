@@ -23,6 +23,7 @@ public class Sample {
   @Field(type = FieldType.Text)
   protected String name;
   protected String webinSubmissionAccountId;
+  protected String domain;
   protected Long taxId;
   protected SampleStatus status;
 
@@ -50,7 +51,8 @@ public class Sample {
   @Field(type = FieldType.Nested)
   protected Set<Publication> publications;
   @Field(type = FieldType.Nested)
-  protected Set<StructuredDataTable> structuredData;
+  @JsonDeserialize(using = StructuredDataDeserializer.class)
+  protected Set<StructuredData> structuredData;
 
   private SubmittedViaType submittedVia;
 }

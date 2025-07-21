@@ -41,6 +41,7 @@ public class SampleServiceGrpc extends SearchGrpc.SearchImplBase {
                 .setType(f.type())
                 .setField(f.field())
                 .setCount(f.count())
+                .putAllBuckets(f.buckets())
                 .build()).toList())
         .build();
   }
@@ -62,7 +63,7 @@ public class SampleServiceGrpc extends SearchGrpc.SearchImplBase {
     log.info("Start of stream for samples................");
     SearchQuery searchQuery = SearchQueryMapper.mapGrpcSearchQuery(searchRequest);
     List<String> searchAfter = searchQuery.getSearchAfter() ;
-    SearchPage<Sample> samplePage = null;
+    SearchPage<Sample> samplePage;
     while (true) {
       searchQuery = searchQuery.toBuilder().searchAfter(searchAfter).build();
       samplePage = searchService.search(searchQuery);
