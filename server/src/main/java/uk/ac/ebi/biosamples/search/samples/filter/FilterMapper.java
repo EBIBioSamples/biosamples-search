@@ -5,6 +5,7 @@ import uk.ac.ebi.biosamples.search.grpc.*;
 public class FilterMapper {
   public static SearchFilter mapGrpcFilterToSearchFilter(Filter grpcFilter) {
     return switch (grpcFilter.getValueCase()) {
+      case PUBLIC -> getPublicSearchFilter(grpcFilter.getPublic());
       case ACCESSION -> getAccessionSearchFilter(grpcFilter.getAccession());
       case SRAACCESSION -> getSraAccessionSearchFilter(grpcFilter.getSraAccession());
       case NAME -> getNameSearchFilter(grpcFilter.getName());
@@ -16,6 +17,10 @@ public class FilterMapper {
       case STRUCTUREDDATA -> getStructuredDataSearchFilter(grpcFilter.getStructuredData());
       case VALUE_NOT_SET -> throw new IllegalArgumentException("Filter dataType not set");
     };
+  }
+
+  private static PublicSearchFilter getPublicSearchFilter(PublicFilter filter) {
+    return new PublicSearchFilter(filter.getWebinId());
   }
 
   private static AccessionSearchFilter getAccessionSearchFilter(AccessionFilter filter) {

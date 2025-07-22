@@ -19,11 +19,12 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = AttributeSearchFilter.class, name = "attr"),
     @JsonSubTypes.Type(value = RelationshipSearchFilter.class, name = "rel"), //reverse?
     @JsonSubTypes.Type(value = ExternalRefSearchFilter.class, name = "extd"),
-    @JsonSubTypes.Type(value = StructuredDataSearchFilter.class, name = "sdata")
+    @JsonSubTypes.Type(value = StructuredDataSearchFilter.class, name = "sdata"),
+    @JsonSubTypes.Type(value = PublicSearchFilter.class, name = "pub")
 })
 public sealed interface SearchFilter permits AccessionSearchFilter, SraAccessionSearchFilter, NameSearchFilter,
     WebinIdSearchFilter, DomainSearchFilter, DateRangeSearchFilter, AttributeSearchFilter, RelationshipSearchFilter,
-    ExternalRefSearchFilter, StructuredDataSearchFilter {
+    ExternalRefSearchFilter, StructuredDataSearchFilter, PublicSearchFilter {
 
   Query getQuery();
 }

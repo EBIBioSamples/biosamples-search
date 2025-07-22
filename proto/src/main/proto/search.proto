@@ -18,16 +18,21 @@ service Search {
 
 message Filter {
   oneof value {
-    AccessionFilter accession = 1;
-    SraAccessionFilter sraAccession = 2;
-    NameFilter name = 3;
-    WebinIdFilter webin = 4;
-    DateRangeFilter dateRange = 5;
-    AttributeFilter attribute = 6;
-    RelationshipFilter relationship = 7;
-    ExternalRefFilter external = 8;
-    StructuredDataFilter structuredData = 9;
+    PublicFilter public = 1;
+    AccessionFilter accession = 2;
+    SraAccessionFilter sraAccession = 3;
+    NameFilter name = 4;
+    WebinIdFilter webin = 5;
+    DateRangeFilter dateRange = 6;
+    AttributeFilter attribute = 7;
+    RelationshipFilter relationship = 8;
+    ExternalRefFilter external = 9;
+    StructuredDataFilter structuredData = 10;
   }
+}
+
+message PublicFilter {
+  string webinId = 1;
 }
 
 message AccessionFilter {
