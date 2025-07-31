@@ -99,10 +99,62 @@ public class SampleServiceGrpcIT {
   @Test
   void searchSamplesWithTextAndMixOfFilters_shouldReturnRelevantSampleAccessions() {
     runTestWithSetupAndTearDown((stub) -> {
-      String text = "Dermacentor andersoni";
+      String text = "ReCoDID";
+      Filter publicFilter = Filter.newBuilder()
+          .setPublic(PublicFilter.newBuilder().setWebinId("Webin-40757").build())
+          .build();
+      Filter attributeFilter = Filter.newBuilder()
+          .setAttribute(AttributeFilter.newBuilder()
+              .setField("organism")
+              .addAllValues(List.of("Homo sapiens"))
+              .build())
+          .build();
+      Filter relationshipFilter = Filter.newBuilder()
+          .setRelationship(RelationshipFilter.newBuilder()
+              .setRelType("derived from")
+              .setTarget("SAMEA12928720")
+              .build())
+          .build();
+      SearchRequest request = SearchRequest.newBuilder()
+          .setText(text)
+          .addAllFilters(List.of(publicFilter, attributeFilter, relationshipFilter))
+          .setSize(10)
+          .build();
+      SearchResponse response = stub.searchSamples(request);
+      assertThat(response.getTotalElements()).isEqualTo(3);
+    });
+  }
+
+  @Test
+  void streamSamplesWithAdvancedTextSearch_shouldReturnCorrectSampleAccessionsStream() {
+    runTestWithSetupAndTearDown((stub) -> {
+      String text = "Tokyo AND University";
       SearchRequest request = SearchRequest.newBuilder().setText(text).setSize(10).build();
       SearchResponse response = stub.searchSamples(request);
-      assertThat(response.getTotalElements()).isEqualTo(1);
+      long tokyoAndUniversityCount = response.getTotalElements();
+
+      text = "Tokyo OR University";
+      request = SearchRequest.newBuilder().setText(text).setSize(10).build();
+      response = stub.searchSamples(request);
+      long tokyoOrUniversityCount = response.getTotalElements();
+
+      text = "Tokyo AND NOT University";
+      request = SearchRequest.newBuilder().setText(text).setSize(10).build();
+      response = stub.searchSamples(request);
+      long tokyoOnlyCount = response.getTotalElements();
+
+      text = "NOT Tokyo AND University";
+      request = SearchRequest.newBuilder().setText(text).setSize(10).build();
+      response = stub.searchSamples(request);
+      long universityOnlyCount = response.getTotalElements();
+
+      text = "University";
+      request = SearchRequest.newBuilder().setText(text).setSize(10).build();
+      response = stub.searchSamples(request);
+      long universityCount = response.getTotalElements();
+
+      assertThat(tokyoOnlyCount + universityCount).isEqualTo(tokyoOrUniversityCount);
+      assertThat(tokyoOnlyCount + tokyoAndUniversityCount + universityOnlyCount).isEqualTo(tokyoOrUniversityCount);
     });
   }
 

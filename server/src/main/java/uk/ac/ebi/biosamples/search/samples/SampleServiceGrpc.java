@@ -20,7 +20,7 @@ public class SampleServiceGrpc extends SearchGrpc.SearchImplBase {
   private final FacetService facetService;
 
   private static SearchResponse populateSearchResponse(SearchPage<Sample> samplePage) {
-    return SearchResponse.newBuilder()
+    SearchResponse.Builder builder = SearchResponse.newBuilder()
         .addAllAccessions(
             samplePage.stream()
                 .map(s -> s.getContent().accession)
@@ -29,9 +29,13 @@ public class SampleServiceGrpc extends SearchGrpc.SearchImplBase {
         .setNumber(samplePage.getNumber())
         .setTotalElements(samplePage.getTotalElements())
         .setTotalPages(samplePage.getTotalPages())
-        .setSearchAfter(samplePage.getContent().getLast().getContent().getUpdate().toString())
-        .addAllSort(samplePage.getSort().stream().map(Sort.Order::getProperty).toList())
-        .build();
+        .addAllSort(samplePage.getSort().stream().map(Sort.Order::getProperty).toList());
+
+    if (!samplePage.getContent().isEmpty()) {
+      builder.setSearchAfter(samplePage.getContent().getLast().getContent().getUpdate().toString());
+    }
+
+    return builder.build();
   }
 
   private static FacetResponse populateFacetResponse(List<uk.ac.ebi.biosamples.search.samples.facet.Facet> facets) {
