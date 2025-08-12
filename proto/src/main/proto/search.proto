@@ -69,7 +69,7 @@ message AttributeFilter {
 }
 
 message RelationshipFilter {
-  string relType = 1;
+  string type = 1;
   string source = 2;
   string target = 3;
 }

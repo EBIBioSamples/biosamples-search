@@ -15,8 +15,14 @@ public class RelationshipFacet {
   public static Aggregation getAggregations() {
     return Aggregation.of(a -> a
         .nested(n -> n.path("relationships"))
-        .aggregations("by_key", a1 -> a1
-            .terms(t -> t.field("relationships.dataType.keyword"))
+        .aggregations("by_type", a1 -> a1
+            .terms(t -> t.field("relationships.type.keyword"))
+        )
+        .aggregations("by_source", a1 -> a1
+            .terms(t -> t.field("relationships.source.keyword"))
+        )
+        .aggregations("by_target", a1 -> a1
+            .terms(t -> t.field("relationships.target.keyword"))
         )
     );
   }
@@ -24,10 +30,28 @@ public class RelationshipFacet {
   public static List<Facet> populateFacetFromAggregationResults(ElasticsearchAggregation aggregation) {
     List<Facet> facets = new ArrayList<>();
     NestedAggregate nestedAggResult = aggregation.aggregation().getAggregate().nested();
-    Map<String, Long> facetBuckets = new HashMap<>();
-    facets.add(new Facet("rel", "RelType", nestedAggResult.docCount(), facetBuckets));
 
-    List<StringTermsBucket> stBuckets = nestedAggResult.aggregations().get("by_key").sterms().buckets().array();
+    Map<String, Long> facetBuckets = new HashMap<>();
+    facets.add(new Facet("rel", "relationship type", nestedAggResult.docCount(), facetBuckets));
+    List<StringTermsBucket> stBuckets = nestedAggResult.aggregations().get("by_type").sterms().buckets().array();
+    for (StringTermsBucket bucket : stBuckets) {
+      long keyCount = bucket.docCount();
+      String keyKey = bucket.key().stringValue();
+      facetBuckets.put(keyKey, keyCount);
+    }
+
+    facetBuckets = new HashMap<>();
+    facets.add(new Facet("rel", "relationship source", nestedAggResult.docCount(), facetBuckets));
+    stBuckets = nestedAggResult.aggregations().get("by_source").sterms().buckets().array();
+    for (StringTermsBucket bucket : stBuckets) {
+      long keyCount = bucket.docCount();
+      String keyKey = bucket.key().stringValue();
+      facetBuckets.put(keyKey, keyCount);
+    }
+
+    facetBuckets = new HashMap<>();
+    facets.add(new Facet("rel", "relationship target", nestedAggResult.docCount(), facetBuckets));
+    stBuckets = nestedAggResult.aggregations().get("by_target").sterms().buckets().array();
     for (StringTermsBucket bucket : stBuckets) {
       long keyCount = bucket.docCount();
       String keyKey = bucket.key().stringValue();

@@ -52,7 +52,7 @@ public class FilterMapper {
   }
 
   private static RelationshipSearchFilter getRelationshipSearchFilter(RelationshipFilter filter) {
-    return new RelationshipSearchFilter(filter.getRelType(), filter.getSource(), filter.getTarget());
+    return new RelationshipSearchFilter(filter.getType(), filter.getSource(), filter.getTarget());
   }
 
   private static ExternalRefSearchFilter getExternalRefSearchFilter(ExternalRefFilter filter) {

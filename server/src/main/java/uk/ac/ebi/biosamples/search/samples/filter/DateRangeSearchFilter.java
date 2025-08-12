@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.extern.jackson.Jacksonized;
 import org.springframework.util.StringUtils;
 
+import java.time.Instant;
+
 public record DateRangeSearchFilter(DateField field, String from, String to) implements SearchFilter {
 
   @JsonIgnore
@@ -18,9 +20,13 @@ public record DateRangeSearchFilter(DateField field, String from, String to) imp
     DateRangeQuery.Builder builder = new DateRangeQuery.Builder().field(field.name().toLowerCase());
     if (StringUtils.hasText(from)) {
       builder.gte(from);
+    } else {
+      builder.gte("1970-01-01T00:00:00.000Z");
     }
     if (StringUtils.hasText(to)) {
       builder.lte(to);
+    } else {
+      builder.lte(Instant.now().toString());
     }
 
     return RangeQuery.of(r -> r

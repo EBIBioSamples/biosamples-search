@@ -56,7 +56,7 @@ public class FacetService {
   }
 
   private List<Facet> retrieveFacets(NativeQuery query) {
-    log.info("Generated Elasticsearch Query: {}", query.getAggregations().toString());
+    log.info("Generated Elasticsearch Query: {}", query.getQuery().toString());
     SearchHits<Sample> hits = elasticsearchOperations.search(query, Sample.class);
     List<Facet> facets = new ArrayList<>();
 

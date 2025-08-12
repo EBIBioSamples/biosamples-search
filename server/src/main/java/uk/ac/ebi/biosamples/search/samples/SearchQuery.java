@@ -12,8 +12,8 @@ public class SearchQuery {
   private final String text;
   private final List<SearchFilter> filters;
 
-  private final Integer page;
-  private final Integer size;
+  private final int page;
+  private final int size;
   private final List<SortOrder> sort; //allways add update + accession
   private final List<String> searchAfter;
 

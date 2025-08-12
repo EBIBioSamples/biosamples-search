@@ -111,7 +111,7 @@ public class SampleServiceGrpcIT {
           .build();
       Filter relationshipFilter = Filter.newBuilder()
           .setRelationship(RelationshipFilter.newBuilder()
-              .setRelType("derived from")
+              .setType("derived from")
               .setTarget("SAMEA12928720")
               .build())
           .build();
