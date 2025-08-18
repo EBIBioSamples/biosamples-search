@@ -12,10 +12,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.biosamples.search.es.QueryHelper;
-import uk.ac.ebi.biosamples.search.samples.facet.AttributeFacet;
-import uk.ac.ebi.biosamples.search.samples.facet.DateRangeFacet;
-import uk.ac.ebi.biosamples.search.samples.facet.Facet;
-import uk.ac.ebi.biosamples.search.samples.facet.RelationshipFacet;
+import uk.ac.ebi.biosamples.search.samples.facet.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,6 +37,7 @@ public class FacetService {
     aggregationMap.put("characteristics", AttributeFacet.getAggregations());
     aggregationMap.put("relationships", RelationshipFacet.getAggregations());
     aggregationMap.put("update", DateRangeFacet.getAggregations());
+    aggregationMap.put("externalReferences", ExternalRefFacet.getAggregations());
     return aggregationMap;
   }
 
@@ -69,6 +67,7 @@ public class FacetService {
     facets.addAll(AttributeFacet.populateFacetFromAggregationResults(aggMap.get("characteristics")));
     facets.addAll(RelationshipFacet.populateFacetFromAggregationResults(aggMap.get("relationships")));
     facets.addAll(DateRangeFacet.populateFacetFromAggregationResults(aggMap.get("update")));
+    facets.addAll(ExternalRefFacet.populateFacetFromAggregationResults(aggMap.get("externalReferences")));
 
     return facets;
   }

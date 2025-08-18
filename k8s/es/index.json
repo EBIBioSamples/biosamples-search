@@ -58,6 +58,24 @@
       "externalReferences": {
         "type": "nested",
         "properties": {
+          "accession": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "archive": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
           "url": {
             "type": "text",
             "fields": {

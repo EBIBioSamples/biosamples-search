@@ -1,4 +1,16 @@
 services:
+#  biosamples-search:
+#    build: .
+#    image: biosamples-search:latest
+#    ports:
+#      - "8080:8080"
+#      - "9090:9090"
+#    environment:
+#      - spring.elasticsearch.username=elastic
+#      - spring.elasticsearch.password=elastic
+#      - spring.elasticsearch.uris=http://elastic:9200
+#    links:
+#      - elastic
   setup:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     user: "0"

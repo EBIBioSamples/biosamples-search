@@ -20,17 +20,17 @@ public class RabbitConfig {
 
   @Bean
   Queue queue() {
-    return new Queue(REINDEXING_QUEUE, true);
+    return new Queue(INDEXING_QUEUE, true);
   }
 
   @Bean
   DirectExchange exchange() {
-    return new DirectExchange(REINDEXING_EXCHANGE);
+    return new DirectExchange(INDEXING_EXCHANGE);
   }
 
   @Bean
   Binding binding(Queue queue, DirectExchange exchange) {
-    return BindingBuilder.bind(queue).to(exchange).with(REINDEXING_ROUTING_KEY);
+    return BindingBuilder.bind(queue).to(exchange).with(INDEXING_QUEUE);
   }
 
   @Bean
@@ -38,7 +38,7 @@ public class RabbitConfig {
                                            MessageListenerAdapter listenerAdapter) {
     SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
     container.setConnectionFactory(connectionFactory);
-    container.setQueueNames(REINDEXING_QUEUE);
+    container.setQueueNames(INDEXING_QUEUE);
     container.setMessageListener(listenerAdapter);
     return container;
   }
