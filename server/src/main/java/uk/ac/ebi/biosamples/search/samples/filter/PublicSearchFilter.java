@@ -21,8 +21,8 @@ public record PublicSearchFilter(String webinId) implements SearchFilter {
         new AttributeSearchFilter("INSDC status", List.of("suppressed")).getQuery();
 
     Query publicQuery = new BoolQuery.Builder()
-        .must(List.of(publicDateQuery, getSurpressedStatusQuery()))
-//        .mustNot(List.of(suppressedStatusQuery))
+        .must(List.of(publicDateQuery/*, getSurpressedStatusQuery()*/))
+        .mustNot(List.of(suppressedStatusQuery))
         .build()
         ._toQuery();
 
