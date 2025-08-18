@@ -37,7 +37,7 @@ public class IndexingListener {
     }
   }
 
-  @Scheduled(initialDelay = 60, fixedDelay = 60, timeUnit = TimeUnit.SECONDS)
+  @Scheduled(initialDelay = 60, fixedDelay = 5, timeUnit = TimeUnit.SECONDS)
   void indexSamplesInBatches() {
     while (INDEXING_QUEUE.size() >= BATCH_SIZE) {
       indexBatch();
