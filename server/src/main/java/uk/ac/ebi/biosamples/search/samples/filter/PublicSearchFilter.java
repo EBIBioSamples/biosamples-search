@@ -1,7 +1,9 @@
 package uk.ac.ebi.biosamples.search.samples.filter;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.NestedQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.util.StringUtils;
 
@@ -19,8 +21,8 @@ public record PublicSearchFilter(String webinId) implements SearchFilter {
         new AttributeSearchFilter("INSDC status", List.of("suppressed")).getQuery();
 
     Query publicQuery = new BoolQuery.Builder()
-        .must(List.of(publicDateQuery))
-        .mustNot(List.of(suppressedStatusQuery))
+        .must(List.of(publicDateQuery, getSurpressedStatusQuery()))
+//        .mustNot(List.of(suppressedStatusQuery))
         .build()
         ._toQuery();
 
@@ -30,5 +32,27 @@ public record PublicSearchFilter(String webinId) implements SearchFilter {
     }
 
     return publicQuery;
+  }
+
+  public Query getSurpressedStatusQuery() {
+    return NestedQuery.of(n -> n
+        .path("characteristics")
+        .query(q -> q
+            .bool(b -> b
+                .mustNot(
+                    List.of(
+                        TermQuery.of(t -> t
+                            .field("characteristics.key.keyword")
+                            .value("INSDC status")
+                        )._toQuery(),
+                        TermQuery.of(t -> t
+                            .field("characteristics.value.keyword")
+                            .value("suppressed")
+                        )._toQuery()
+                    )
+                )
+            )
+        )
+    )._toQuery();
   }
 }
