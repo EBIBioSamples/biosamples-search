@@ -16,7 +16,7 @@ spring:
 biosamples:
   search:
     indexing:
-      fixed-delay: 1
+      fixed-rate: 1
 management:
   endpoints:
     web:

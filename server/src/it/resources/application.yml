@@ -9,6 +9,10 @@ spring:
   jackson:
     deserialization:
       FAIL_ON_UNKNOWN_PROPERTIES: false
+biosamples:
+  search:
+    indexing:
+      fixed-rate: 60
 
 
 

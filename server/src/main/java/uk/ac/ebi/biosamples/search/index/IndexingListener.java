@@ -37,7 +37,7 @@ public class IndexingListener {
     }
   }
 
-  @Scheduled(initialDelay = 60, fixedDelayString = "${biosamples.search.indexing.fixed-delay}", timeUnit = TimeUnit.SECONDS)
+  @Scheduled(initialDelay = 60, fixedRateString = "${biosamples.search.indexing.fixed-rate}", timeUnit = TimeUnit.SECONDS)
   void indexSamplesInBatches() {
     while (INDEXING_QUEUE.size() >= BATCH_SIZE) {
       indexBatch();
