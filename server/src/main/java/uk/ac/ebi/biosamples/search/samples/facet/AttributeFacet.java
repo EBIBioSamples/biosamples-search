@@ -76,6 +76,9 @@ public class AttributeFacet {
       }
     }
 
+    if (nestedAggResult.aggregations().get("static") == null) {
+      return facets;
+    }
 
     stBuckets = nestedAggResult.aggregations().get("static").sterms().buckets().array();
     for (StringTermsBucket bucket : stBuckets) {
