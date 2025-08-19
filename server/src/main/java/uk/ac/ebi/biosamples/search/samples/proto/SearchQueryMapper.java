@@ -41,6 +41,7 @@ public class SearchQueryMapper {
     return SearchQuery.builder()
         .text(facetRequest.getText())
         .filters(facetRequest.getFiltersList().stream().map(FilterMapper::mapGrpcFilterToSearchFilter).toList())
+        .facets(facetRequest.getFacetsList())
         .size(STREAM_PAGE_SIZE)
         .build();
   }

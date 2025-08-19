@@ -19,5 +19,5 @@ public class SearchQuery {
 
 //  private final String scrollId;
 //  private final String scrollAfter;
-//  private final List<String> facets;
+  private final List<String> facets;
 }

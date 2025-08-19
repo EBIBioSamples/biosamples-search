@@ -11,6 +11,7 @@ import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import uk.ac.ebi.biosamples.search.es.QueryHelper;
 import uk.ac.ebi.biosamples.search.samples.facet.*;
 
@@ -33,6 +34,15 @@ public class FacetService {
   }
 
   private Map<String, Aggregation> getAggregations(SearchQuery searchQuery) {
+    if (!CollectionUtils.isEmpty(searchQuery.getFacets())) {
+      Map<String, Aggregation> aggregationMap = new HashMap<>();
+      aggregationMap.put("characteristics", AttributeFacet.getAggregations(searchQuery.getFacets()));
+      return aggregationMap;
+    }
+    return getDefaultAggregations();
+  }
+
+  private Map<String, Aggregation> getDefaultAggregations() {
     Map<String, Aggregation> aggregationMap = new HashMap<>();
     aggregationMap.put("characteristics", AttributeFacet.getAggregations());
     aggregationMap.put("relationships", RelationshipFacet.getAggregations());

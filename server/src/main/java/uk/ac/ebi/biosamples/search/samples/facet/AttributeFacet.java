@@ -14,6 +14,22 @@ public class AttributeFacet {
   private static final List<String> EXCLUDED_FACETS = List.of("sample name", "title", "sample comment", "INSDC first public", "INSDC secondary accession", "INSDC last update", "collection date", "SRA accession", "External Id");
   private static final List<String> STATIC_FACETS = List.of("organism", "sex");
 
+  public static Aggregation getAggregations(List<String> facets) {
+    return Aggregation.of(a -> a
+        .nested(n -> n.path("characteristics"))
+        .aggregations("by_key", a1 -> a1
+            .terms(t -> t
+                .field("characteristics.key.keyword")
+                .include(e -> e.terms(facets))
+            )
+            .aggregations("by_value", a2 -> a2
+                .terms(t2 -> t2
+                    .field("characteristics.value.keyword")
+                )
+            )
+        ));
+  }
+
   public static Aggregation getAggregations() {
     return Aggregation.of(a -> a
         .nested(n -> n.path("characteristics"))
