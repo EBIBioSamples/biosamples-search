@@ -74,10 +74,18 @@ public class FacetService {
     }
 
     Map<String, ElasticsearchAggregation> aggMap = aggregations.aggregationsAsMap();
-    facets.addAll(AttributeFacet.populateFacetFromAggregationResults(aggMap.get("characteristics")));
-    facets.addAll(RelationshipFacet.populateFacetFromAggregationResults(aggMap.get("relationships")));
-    facets.addAll(DateRangeFacet.populateFacetFromAggregationResults(aggMap.get("update")));
-    facets.addAll(ExternalRefFacet.populateFacetFromAggregationResults(aggMap.get("externalReferences")));
+    if (aggMap.containsKey("characteristics")) {
+      facets.addAll(AttributeFacet.populateFacetFromAggregationResults(aggMap.get("characteristics")));
+    }
+    if (aggMap.containsKey("relationships")) {
+      facets.addAll(RelationshipFacet.populateFacetFromAggregationResults(aggMap.get("relationships")));
+    }
+    if (aggMap.containsKey("update")) {
+      facets.addAll(DateRangeFacet.populateFacetFromAggregationResults(aggMap.get("update")));
+    }
+    if (aggMap.containsKey("externalReferences")) {
+      facets.addAll(ExternalRefFacet.populateFacetFromAggregationResults(aggMap.get("externalReferences")));
+    }
 
     return facets;
   }
