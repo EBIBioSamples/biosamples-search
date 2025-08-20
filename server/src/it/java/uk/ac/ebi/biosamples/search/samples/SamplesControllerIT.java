@@ -9,6 +9,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.testcontainers.context.ImportTestcontainers;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.util.CollectionUtils;
 import uk.ac.ebi.biosamples.search.IntegrationTestConfiguration;
 import uk.ac.ebi.biosamples.search.TestDependencyContainers;
 import uk.ac.ebi.biosamples.search.samples.filter.*;
@@ -50,6 +51,20 @@ public class SamplesControllerIT {
     PagedModel<?> response = restTemplate.postForObject(url, searchQuery, PagedModel.class);
     assertThat(response).isNotNull();
     assertThat(response.getMetadata().getTotalElements()).isEqualTo(2);
+  }
+
+  @Test
+  void paginatingThroughSamples_shouldReturnAllPages() {
+    String url = "http://localhost:" + port + "/search";
+    SearchQuery searchQuery = SearchQuery.builder().size(100).build();
+    PagedModel<?> response = restTemplate.postForObject(url, searchQuery, PagedModel.class);
+    int page = 0;
+    while(!CollectionUtils.isEmpty(response.getContent())) {
+      page++;
+      searchQuery = searchQuery.toBuilder().page(page).build();
+      response = restTemplate.postForObject(url, searchQuery, PagedModel.class);
+    }
+    assertThat(page).isGreaterThanOrEqualTo(7);
   }
 
   @Nested

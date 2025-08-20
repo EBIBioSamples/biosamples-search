@@ -40,7 +40,7 @@ public class SearchService {
     NativeQuery query = getEsNativeQuery(pageRequest, esSearchQuery);
 
     SearchAfter searchAfter = searchQuery.getSearchAfter();
-    if (searchAfter != null && searchAfter.update() != null && !StringUtil.isNullOrEmpty(searchAfter.accession())) {
+    if (isSearchAfterPresentInRequest(searchQuery)) {
       query.setSearchAfter(List.of(searchAfter.update().toString(), searchAfter.accession()));
     }
 
@@ -49,7 +49,7 @@ public class SearchService {
 
   private PageRequest getPage(SearchQuery searchQuery) {
     List<Sort.Order> sortOrders = getSortOrders(searchQuery);
-    int page = searchQuery.getSearchAfter() != null ? 0 : searchQuery.getPage();
+    int page = isSearchAfterPresentInRequest(searchQuery) ? 0 : searchQuery.getPage();
     int size = searchQuery.getSize() == 0 ? 20 : searchQuery.getSize();
     return PageRequest.of(page, size, Sort.by(sortOrders));
   }
@@ -76,6 +76,13 @@ public class SearchService {
     log.info("Generated Elasticsearch Query: {}", query.getQuery());
     SearchHits<Sample> hits = elasticsearchOperations.search(query, Sample.class);
     return SearchHitSupport.searchPageFor(hits, query.getPageable());
+  }
+
+  private boolean isSearchAfterPresentInRequest(SearchQuery searchQuery) {
+    SearchAfter searchAfter = searchQuery.getSearchAfter();
+    return searchAfter != null
+        && searchAfter.update() != null
+        && !StringUtil.isNullOrEmpty(searchAfter.accession());
   }
 
 }
