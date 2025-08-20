@@ -3,6 +3,8 @@
 // https://grpc.io/docs/languages/java/basics/
 syntax = "proto3";
 
+import "google/protobuf/timestamp.proto";
+
 option java_multiple_files = true;
 option java_package = "uk.ac.ebi.biosamples.search.grpc";
 option java_outer_classname = "SearchApi";
@@ -92,12 +94,17 @@ message Facet {
   map<string, int64> buckets = 4;
 }
 
+message SearchAfter {
+  google.protobuf.Timestamp update = 1;
+  string accession = 2;
+}
+
 message SearchRequest {
   string text = 1;
   repeated Filter filters = 2;
   int32 size = 3;
   int32 number = 4;
-  string searchAfter = 5;
+  SearchAfter searchAfter = 5;
   repeated string sort = 6;
 }
 
@@ -107,20 +114,20 @@ message SearchResponse {
   int32 number = 3;
   int64 totalElements = 4;
   int32 totalPages = 5;
-  string searchAfter = 6;
+  SearchAfter searchAfter = 6;
   repeated string sort = 7;
 }
 
 message StreamRequest {
   string text = 1;
   repeated Filter filters = 2;
-  repeated string searchAfter = 5;
+  SearchAfter searchAfter = 5;
   repeated string sort = 6;
 }
 
 message StreamResponse {
   string accession = 1;
-  repeated string searchAfter = 2;
+  SearchAfter searchAfter = 2;
 }
 
 message FacetRequest {

@@ -11,13 +11,9 @@ import java.util.List;
 public class SearchQuery {
   private final String text;
   private final List<SearchFilter> filters;
-
+  private final List<String> facets;
   private final int page;
   private final int size;
   private final List<SortOrder> sort; //allways add update + accession
-  private final List<String> searchAfter;
-
-//  private final String scrollId;
-//  private final String scrollAfter;
-  private final List<String> facets;
+  private final SearchAfter searchAfter;
 }

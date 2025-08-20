@@ -32,7 +32,13 @@ public class SampleServiceGrpc extends SearchGrpc.SearchImplBase {
         .addAllSort(samplePage.getSort().stream().map(Sort.Order::getProperty).toList());
 
     if (!samplePage.getContent().isEmpty()) {
-      builder.setSearchAfter(samplePage.getContent().getLast().getContent().getUpdate().toString());
+      Sample lastSample = samplePage.getContent().getLast().getContent();
+      uk.ac.ebi.biosamples.search.grpc.SearchAfter searchAfter =
+          uk.ac.ebi.biosamples.search.grpc.SearchAfter.newBuilder()
+              .setUpdate(SearchQueryMapper.convertToTimestamp(lastSample.getUpdate()))
+              .setAccession(lastSample.getAccession())
+              .build();
+      builder.setSearchAfter(searchAfter);
     }
 
     return builder.build();
@@ -54,7 +60,7 @@ public class SampleServiceGrpc extends SearchGrpc.SearchImplBase {
   public void searchSamples(SearchRequest searchRequest, StreamObserver<SearchResponse> responseObserver) {
     log.info("Calling GRPC method search samples.................");
 
-    SearchQuery searchQuery = SearchQueryMapper.mapGrpcSearchQuery(searchRequest);
+    SearchQuery searchQuery = SearchQueryMapper.mapFromGrpcSearchQuery(searchRequest);
     SearchPage<Sample> samplePage = searchService.search(searchQuery);
     SearchResponse response = populateSearchResponse(samplePage);
 
@@ -65,8 +71,8 @@ public class SampleServiceGrpc extends SearchGrpc.SearchImplBase {
   @Override
   public void streamSamples(StreamRequest searchRequest, StreamObserver<StreamResponse> responseObserver) {
     log.info("Start of stream for samples................");
-    SearchQuery searchQuery = SearchQueryMapper.mapGrpcSearchQuery(searchRequest);
-    List<String> searchAfter = searchQuery.getSearchAfter() ;
+    SearchQuery searchQuery = SearchQueryMapper.mapFromGrpcSearchQuery(searchRequest);
+    SearchAfter searchAfter = searchQuery.getSearchAfter() ;
     SearchPage<Sample> samplePage;
     while (true) {
       searchQuery = searchQuery.toBuilder().searchAfter(searchAfter).build();
@@ -75,13 +81,11 @@ public class SampleServiceGrpc extends SearchGrpc.SearchImplBase {
         break;
       }
       for (SearchHit<Sample> sample : samplePage.getContent()) {
+        searchAfter = new SearchAfter(sample.getContent().getUpdate(), sample.getContent().getAccession());
         responseObserver.onNext(
             StreamResponse.newBuilder()
                 .setAccession(sample.getContent().getAccession())
-                .addSearchAfter(sample.getContent().getUpdate().toString())
-                .addSearchAfter(sample.getContent().getAccession())
-                .build());
-        searchAfter = List.of(sample.getContent().getUpdate().toString(), sample.getContent().getAccession());
+                .setSearchAfter(SearchQueryMapper.mapToGrpcSearchAfter(searchAfter)).build());
       }
     }
     log.info("End of stream for samples................");
@@ -92,11 +96,12 @@ public class SampleServiceGrpc extends SearchGrpc.SearchImplBase {
   public void getFacets(FacetRequest facetRequest, StreamObserver<FacetResponse> responseObserver) {
     log.info("Calling GRPC method get facets.................");
 
-    SearchQuery searchQuery = SearchQueryMapper.mapGrpcSearchQuery(facetRequest);
+    SearchQuery searchQuery = SearchQueryMapper.mapFromGrpcSearchQuery(facetRequest);
     List<uk.ac.ebi.biosamples.search.samples.facet.Facet> facets = facetService.getFacets(searchQuery);
     FacetResponse response = populateFacetResponse(facets);
 
     responseObserver.onNext(response);
     responseObserver.onCompleted();
   }
+
 }

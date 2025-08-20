@@ -164,6 +164,6 @@ class SampleServiceGrpcTest {
 
   private void assertStreamResponse(StreamResponse response) {
     assertThat(response.getAccession()).isNotBlank();
-    assertThat(response.getSearchAfterList().getFirst()).isInstanceOf(String.class);
+    assertThat(response.getSearchAfter()).isNotNull();
   }
 }

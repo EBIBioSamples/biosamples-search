@@ -39,8 +39,9 @@ public class SearchService {
     Query esSearchQuery = QueryHelper.getSearchQuery(searchQuery);
     NativeQuery query = getEsNativeQuery(pageRequest, esSearchQuery);
 
-    if (!CollectionUtils.isEmpty(searchQuery.getSearchAfter())) {
-      query.setSearchAfter(Arrays.asList(searchQuery.getSearchAfter().toArray()));
+    SearchAfter searchAfter = searchQuery.getSearchAfter();
+    if (searchAfter != null && searchAfter.update() != null && !StringUtil.isNullOrEmpty(searchAfter.accession())) {
+      query.setSearchAfter(List.of(searchAfter.update().toString(), searchAfter.accession()));
     }
 
     return searchForSamplePage(query);
