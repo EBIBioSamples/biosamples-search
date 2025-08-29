@@ -12,8 +12,8 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitConfig {
-  public static final String INDEXING_QUEUE = "biosamples.tobeindexed.solr";
-  public static final String INDEXING_EXCHANGE = "biosamples.forindexing.solr";
+  public static final String INDEXING_QUEUE = "biosamples.indexing.es";
+  public static final String INDEXING_EXCHANGE = "biosamples.indexing";
   public static final String REINDEXING_QUEUE = "biosamples.reindex.elasticsearch";
   public static final String REINDEXING_EXCHANGE = "biosamples.reindex.solr";
   public static final String REINDEXING_ROUTING_KEY = "biosamples.reindex.solr";
