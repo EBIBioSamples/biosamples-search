@@ -52,6 +52,18 @@ deploy_primary_dev:
     - main
   when: manual
   extends: .kube_deploy_script
+
+deploy_primary_prod:
+  variables:
+    ENVIRONMENT_NAME: prod
+  environment:
+    name: primary_prod
+    url: https://wwwdev.ebi.ac.uk/biosamples/search
+  only:
+    - dev
+    - main
+  when: manual
+  extends: .kube_deploy_script
 #
 #deploy_fallback_dev:
 #  variables:

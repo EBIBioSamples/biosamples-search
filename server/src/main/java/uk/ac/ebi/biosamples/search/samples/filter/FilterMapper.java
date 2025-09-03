@@ -10,6 +10,7 @@ public class FilterMapper {
       case SRAACCESSION -> getSraAccessionSearchFilter(grpcFilter.getSraAccession());
       case NAME -> getNameSearchFilter(grpcFilter.getName());
       case WEBIN -> getWebinIdSearchFilter(grpcFilter.getWebin());
+      case DOMAIN -> getDomainSearchFilter(grpcFilter.getDomain());
       case DATERANGE -> getDateRangeSearchFilter(grpcFilter.getDateRange());
       case ATTRIBUTE -> getAttributeSearchFilter(grpcFilter.getAttribute());
       case RELATIONSHIP -> getRelationshipSearchFilter(grpcFilter.getRelationship());
@@ -37,6 +38,10 @@ public class FilterMapper {
 
   private static WebinIdSearchFilter getWebinIdSearchFilter(WebinIdFilter filter) {
     return new WebinIdSearchFilter(filter.getWebinId());
+  }
+
+  private static DomainSearchFilter getDomainSearchFilter(DomainFilter filter) {
+    return new DomainSearchFilter(filter.getDomain());
   }
 
   private static DateRangeSearchFilter getDateRangeSearchFilter(DateRangeFilter filter) {

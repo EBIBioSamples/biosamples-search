@@ -30,6 +30,7 @@ message Filter {
     RelationshipFilter relationship = 8;
     ExternalRefFilter external = 9;
     StructuredDataFilter structuredData = 10;
+    DomainFilter domain = 11;
   }
 }
 
@@ -52,6 +53,11 @@ message NameFilter {
 message WebinIdFilter {
   string webinId = 1;
 }
+
+message DomainFilter {
+  string domain = 1;
+}
+
 
 message DateRangeFilter {
   enum DateField {
