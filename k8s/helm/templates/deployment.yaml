@@ -64,12 +64,12 @@ spec:
                   key: password
 
           ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
+          {{- range .Values.service.ports }}
+            - name: {{ .name }}
+              containerPort: {{ .port }}
               protocol: TCP
-            - name: grpc
-              containerPort: 9090
-              protocol: TCP
+          {{- end }}
+
 {{/*          {{- with .Values.livenessProbe }}*/}}
 {{/*          livenessProbe:*/}}
 {{/*            {{- toYaml . | nindent 12 }}*/}}
