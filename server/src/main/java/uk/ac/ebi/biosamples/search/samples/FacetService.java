@@ -1,5 +1,6 @@
 package uk.ac.ebi.biosamples.search.samples;
 
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.util.CollectionUtils;
 import uk.ac.ebi.biosamples.search.es.QueryHelper;
 import uk.ac.ebi.biosamples.search.samples.facet.*;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +45,30 @@ public class FacetService {
   }
 
   private Map<String, Aggregation> getDefaultAggregations() {
+    Aggregation totalCountAgg = Aggregation.of(a -> a
+        .valueCount(v -> v.field("accession.keyword"))
+    );
+
+    Map<String, Aggregation> subAggregations = new HashMap<>();
+    subAggregations.put("total_sampled", totalCountAgg);
+    subAggregations.put("characteristics", AttributeFacet.getAggregations());
+    subAggregations.put("relationships", RelationshipFacet.getAggregations());
+    subAggregations.put("externalReferences", ExternalRefFacet.getAggregations());
+
+    Aggregation samplerAgg = new Aggregation.Builder()
+        .sampler(s -> s.shardSize(100000))
+        .aggregations(subAggregations)
+        .build();
+
+    Map<String, Aggregation> aggregationMap = new HashMap<>();
+    aggregationMap.put("sampled_facets", samplerAgg);
+    aggregationMap.put("update", DateRangeFacet.getAggregations());
+    aggregationMap.put("total_docs", totalCountAgg);
+
+    return aggregationMap;
+  }
+
+  private Map<String, Aggregation> getDefaultAggregations1() {
     Map<String, Aggregation> aggregationMap = new HashMap<>();
     aggregationMap.put("characteristics", AttributeFacet.getAggregations());
     aggregationMap.put("relationships", RelationshipFacet.getAggregations());
@@ -54,7 +80,8 @@ public class FacetService {
   private NativeQuery getEsNativeQuery(Query searchQuery, Map<String, Aggregation> aggregations) {
     NativeQueryBuilder builder = NativeQuery.builder()
         .withQuery(searchQuery)
-        .withMaxResults(0);
+        .withMaxResults(0)
+        .withTimeout(Duration.ofSeconds(30));
 
     if (!aggregations.isEmpty()) {
       aggregations.forEach(builder::withAggregation);
@@ -64,7 +91,61 @@ public class FacetService {
   }
 
   private List<Facet> retrieveFacets(NativeQuery query) {
-    log.info("Generated Elasticsearch Query: {}", query.getQuery().toString());
+    log.info("Generated Elasticsearch Query: {}", query.getQuery());
+    SearchHits<Sample> hits = elasticsearchOperations.search(query, Sample.class);
+    List<Facet> facets = new ArrayList<>();
+
+    ElasticsearchAggregations aggregations = (ElasticsearchAggregations) hits.getAggregations();
+    if (aggregations == null) {
+      return facets;
+    }
+
+    Map<String, ElasticsearchAggregation> aggMap = aggregations.aggregationsAsMap();
+
+    long totalDocs = 0;
+    long sampledDocs = 0;
+    double extrapolationFactor = 1.0;
+
+    if (aggMap.containsKey("total_docs")) {
+      totalDocs = (long) aggMap.get("total_docs").aggregation().getAggregate().valueCount().value();
+    }
+
+
+    if (aggMap.containsKey("sampled_facets")) {
+      ElasticsearchAggregation sampledAggContainer = aggMap.get("sampled_facets");
+      if (sampledAggContainer != null && sampledAggContainer.aggregation().getAggregate().isSampler()) {
+        Map<String, Aggregate> subAggs = sampledAggContainer.aggregation().getAggregate().sampler().aggregations();
+
+
+        if (subAggs.containsKey("total_sampled")) {
+          sampledDocs = (long) subAggs.get("total_sampled").valueCount().value();
+        }
+
+        if (sampledDocs > 0 && totalDocs > 0) {
+          extrapolationFactor = (double) totalDocs / sampledDocs;
+        }
+
+        if (subAggs.containsKey("characteristics")) {
+          facets.addAll(AttributeFacet.populateFacetFromAggregationResults(subAggs.get("characteristics"), extrapolationFactor));
+        }
+        if (subAggs.containsKey("relationships")) {
+          facets.addAll(RelationshipFacet.populateFacetFromAggregationResults(subAggs.get("relationships"), extrapolationFactor));
+        }
+        if (subAggs.containsKey("externalReferences")) {
+          facets.addAll(ExternalRefFacet.populateFacetFromAggregationResults(subAggs.get("externalReferences"), extrapolationFactor));
+        }
+      }
+    }
+
+    if (aggMap.containsKey("update")) {
+      facets.addAll(DateRangeFacet.populateFacetFromAggregationResults(aggMap.get("update")));
+    }
+
+    return facets;
+  }
+
+  private List<Facet> retrieveFacets1(NativeQuery query) {
+    log.info("Generated Elasticsearch Query: {}", query.getQuery());
     SearchHits<Sample> hits = elasticsearchOperations.search(query, Sample.class);
     List<Facet> facets = new ArrayList<>();
 
