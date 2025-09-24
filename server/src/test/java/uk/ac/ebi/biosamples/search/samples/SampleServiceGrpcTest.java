@@ -13,6 +13,7 @@ import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import uk.ac.ebi.biosamples.search.grpc.*;
 import uk.ac.ebi.biosamples.search.samples.facet.Facet;
+import uk.ac.ebi.biosamples.search.samples.facet.FacetService;
 
 import java.time.Instant;
 import java.util.HashMap;

@@ -12,15 +12,16 @@ import java.util.List;
 import java.util.Map;
 
 public class AttributeFacet {
-  private static final List<String> EXCLUDED_FACETS = List.of("sample name", "title", "sample comment",
-      "INSDC first public", "INSDC secondary accession", "INSDC last update", "collection date",
-      "SRA accession", "External Id", "Submitter Id");
+  private static final List<String> EXCLUDED_FACETS = List.of(
+      "description", "sample name", "title", "sample comment", "INSDC first public",
+      "INSDC secondary accession", "INSDC last update", "collection date", "SRA accession", "External Id",
+      "Submitter Id");
   private static final List<String> STATIC_FACETS = List.of("organism", "sex");
 
   public static Aggregation getAggregations(List<String> facets) {
     return Aggregation.of(a -> a
         .nested(n -> n.path("characteristics"))
-        .aggregations("by_key", a1 -> a1
+        .aggregations("dynamic", a1 -> a1
             .terms(t -> t
                 .field("characteristics.key.keyword")
                 .include(e -> e.terms(facets))
@@ -38,7 +39,7 @@ public class AttributeFacet {
   public static Aggregation getAggregations() {
     return Aggregation.of(a -> a
         .nested(n -> n.path("characteristics"))
-        .aggregations("by_key", a1 -> a1
+        .aggregations("dynamic", a1 -> a1
             .terms(t -> t
                 .field("characteristics.key.keyword")
                 .exclude(e -> e.terms(EXCLUDED_FACETS))
@@ -79,11 +80,14 @@ public class AttributeFacet {
 
   private static List<Facet> populateFacets(NestedAggregate nestedAggResult, double extrapolationFactor) {
     List<Facet> facets = new ArrayList<>();
-    List<StringTermsBucket> stBuckets = nestedAggResult.aggregations().get("by_key").sterms().buckets().array();
-    populateAttributeFacetFromAggregationBuckets(stBuckets, facets, extrapolationFactor);
+
+    if (nestedAggResult.aggregations().get("dynamic") != null) {
+      List<StringTermsBucket> stBuckets = nestedAggResult.aggregations().get("dynamic").sterms().buckets().array();
+      populateAttributeFacetFromAggregationBuckets(stBuckets, facets, extrapolationFactor);
+    }
 
     if (nestedAggResult.aggregations().get("static") != null) {
-      stBuckets = nestedAggResult.aggregations().get("static").sterms().buckets().array();
+      List<StringTermsBucket> stBuckets = nestedAggResult.aggregations().get("static").sterms().buckets().array();
       populateAttributeFacetFromAggregationBuckets(stBuckets, facets, extrapolationFactor);
     }
 

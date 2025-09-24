@@ -8,6 +8,7 @@ import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.biosamples.search.grpc.*;
+import uk.ac.ebi.biosamples.search.samples.facet.FacetService;
 import uk.ac.ebi.biosamples.search.samples.proto.SearchQueryMapper;
 
 import java.util.List;

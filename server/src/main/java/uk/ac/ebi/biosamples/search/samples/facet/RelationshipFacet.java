@@ -16,19 +16,31 @@ public class RelationshipFacet {
   public static Aggregation getAggregations() {
     return Aggregation.of(a -> a
         .nested(n -> n.path("relationships"))
-        .aggregations("by_type", a1 -> a1
+        .aggregations(RelationshipFacetType.TYPE.type, a1 -> a1
             .terms(t -> t
                 .field("relationships.type.keyword")
                 .size(10)
             )
         )
-        .aggregations("by_source", a1 -> a1
+    );
+  }
+
+  public static Aggregation getAggregationsWithSourceAndTarget() {
+    return Aggregation.of(a -> a
+        .nested(n -> n.path("relationships"))
+        .aggregations(RelationshipFacetType.TYPE.type, a1 -> a1
+            .terms(t -> t
+                .field("relationships.type.keyword")
+                .size(10)
+            )
+        )
+        .aggregations(RelationshipFacetType.SOURCE.type, a1 -> a1
             .terms(t -> t
                 .field("relationships.source.keyword")
                 .size(10)
             )
         )
-        .aggregations("by_target", a1 -> a1
+        .aggregations(RelationshipFacetType.TARGET.type, a1 -> a1
             .terms(t -> t
                 .field("relationships.target.keyword")
                 .size(10)
@@ -49,34 +61,41 @@ public class RelationshipFacet {
 
   private static List<Facet> populateFacets(NestedAggregate nestedAggResult, double extrapolationFactor) {
     List<Facet> facets = new ArrayList<>();
-    Map<String, Long> facetBuckets = new HashMap<>();
     long keyCount = Math.round(nestedAggResult.docCount() * extrapolationFactor);
-    facets.add(new Facet("rel", "relationship type", keyCount, facetBuckets));
-    List<StringTermsBucket> stBuckets = nestedAggResult.aggregations().get("by_type").sterms().buckets().array();
-    for (StringTermsBucket bucket : stBuckets) {
-      long valueCount = Math.round(bucket.docCount() * extrapolationFactor);
-      String keyKey = bucket.key().stringValue();
-      facetBuckets.put(keyKey, valueCount);
-    }
-
-    facetBuckets = new HashMap<>();
-    facets.add(new Facet("rel", "relationship source", nestedAggResult.docCount(), facetBuckets));
-    stBuckets = nestedAggResult.aggregations().get("by_source").sterms().buckets().array();
-    for (StringTermsBucket bucket : stBuckets) {
-      long valueCount = Math.round(bucket.docCount() * extrapolationFactor);
-      String keyKey = bucket.key().stringValue();
-      facetBuckets.put(keyKey, valueCount);
-    }
-
-    facetBuckets = new HashMap<>();
-    facets.add(new Facet("rel", "relationship target", nestedAggResult.docCount(), facetBuckets));
-    stBuckets = nestedAggResult.aggregations().get("by_target").sterms().buckets().array();
-    for (StringTermsBucket bucket : stBuckets) {
-      long valueCount = Math.round(bucket.docCount() * extrapolationFactor);
-      String keyKey = bucket.key().stringValue();
-      facetBuckets.put(keyKey, valueCount);
-    }
+    populateRelationshipFacets(RelationshipFacetType.TYPE, nestedAggResult, facets, keyCount, extrapolationFactor);
+    populateRelationshipFacets(RelationshipFacetType.SOURCE, nestedAggResult, facets, keyCount, extrapolationFactor);
+    populateRelationshipFacets(RelationshipFacetType.TARGET, nestedAggResult, facets, keyCount, extrapolationFactor);
 
     return facets;
+  }
+
+  private static void populateRelationshipFacets(RelationshipFacetType facetType, NestedAggregate nestedAggResult,
+                                                 List<Facet> facets, long keyCount, double extrapolationFactor) {
+    Map<String, Long> facetBuckets;
+    List<StringTermsBucket> stBuckets;
+    if (nestedAggResult.aggregations().get(facetType.type) != null) {
+      facetBuckets = new HashMap<>();
+      facets.add(new Facet("rel", facetType.field, keyCount, facetBuckets));
+      stBuckets = nestedAggResult.aggregations().get(facetType.type).sterms().buckets().array();
+      for (StringTermsBucket bucket : stBuckets) {
+        long valueCount = Math.round(bucket.docCount() * extrapolationFactor);
+        String keyKey = bucket.key().stringValue();
+        facetBuckets.put(keyKey, valueCount);
+      }
+    }
+  }
+
+  enum RelationshipFacetType {
+    TYPE("by_type", "relationship type"),
+    SOURCE("by_source", "relationship source"),
+    TARGET("by_target", "relationship target");
+
+    final String type;
+    final String field;
+
+    RelationshipFacetType(String type, String field) {
+      this.type = type;
+      this.field = field;
+    }
   }
 }

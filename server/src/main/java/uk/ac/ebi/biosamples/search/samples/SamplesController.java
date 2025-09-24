@@ -11,8 +11,8 @@ import org.springframework.hateoas.server.core.EmbeddedWrapper;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
-import uk.ac.ebi.biosamples.search.index.IndexingService;
 import uk.ac.ebi.biosamples.search.samples.facet.Facet;
+import uk.ac.ebi.biosamples.search.samples.facet.FacetService;
 
 import java.util.ArrayList;
 import java.util.List;
