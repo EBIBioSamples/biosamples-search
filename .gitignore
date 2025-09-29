@@ -36,3 +36,5 @@ out/
 
 ### VS Code ###
 .vscode/
+
+k8s/es

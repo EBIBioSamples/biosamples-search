@@ -29,21 +29,11 @@ build_docker_image:
   after_script:
     - docker logout ${CI_REGISTRY}
 
-deploy_wwwdev:
-  variables:
-    ENVIRONMENT_NAME: dev
-  environment:
-    name: fallback_dev
-    url: https://wwwdev.ebi.ac.uk/biosamples/search
-  only:
-    - dev
-    - main
-  when: manual
-  extends: .kube_deploy_script
 
 deploy_primary_dev:
   variables:
-    ENVIRONMENT_NAME: dev
+    ENVIRONMENT_NAME: primary_dev
+    K8S_NAMESPACE: biosamples-dev
   environment:
     name: primary_dev
     url: https://wwwdev.ebi.ac.uk/biosamples/search
@@ -55,7 +45,8 @@ deploy_primary_dev:
 
 deploy_primary_prod:
   variables:
-    ENVIRONMENT_NAME: prod
+    ENVIRONMENT_NAME: primary_prod
+    K8S_NAMESPACE: biosamples-prod
   environment:
     name: primary_prod
     url: https://wwwdev.ebi.ac.uk/biosamples/search
@@ -64,27 +55,26 @@ deploy_primary_prod:
     - main
   when: manual
   extends: .kube_deploy_script
-#
-#deploy_fallback_dev:
-#  variables:
-#    ENVIRONMENT_NAME: dev
-#  environment:
-#    name: fallback_hx_dev
-#    url: https://wwwdev.ebi.ac.uk/biosamples/checklist-editor
-#  only:
-#    - dev
-#    - main
-#  when: manual
-#  extends: .kube_deploy_script
-#
+
+deploy_fallback_prod:
+  variables:
+    ENVIRONMENT_NAME: fallback_prod
+    K8S_NAMESPACE: biosamples-prod
+  environment:
+    name: fallback_prod
+    url: https://wwwdev.ebi.ac.uk/biosamples/search
+  only:
+    - dev
+    - main
+  when: manual
+  extends: .kube_deploy_script
+
 .kube_deploy_script:
   stage: deploy
   image: ${CI_REGISTRY_IMAGE}/dtzar/helm-kubectl:3.16
   tags: ["dind"]
   services:
     - docker:27-dind
-  variables:
-    K8S_NAMESPACE: ${K8S_NAMESPACE_PREFIX}-${ENVIRONMENT_NAME}
   script:
     - echo $K8S_NAMESPACE
     - kubectl config set-context --current --namespace=${K8S_NAMESPACE}
