@@ -2,7 +2,7 @@ search:
   rabbitmq:
     host: localhost
 service:
-  type: ClusterIP
+  type: NodePort
   ports:
     - name: http
       port: 8080
