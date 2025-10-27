@@ -9,17 +9,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
-import org.springframework.data.elasticsearch.core.*;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHitSupport;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import uk.ac.ebi.biosamples.search.es.QueryHelper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -68,15 +65,14 @@ public class SearchService {
     return NativeQuery.builder()
         .withQuery(esSearchQuery)
         .withPageable(page)
+        .withTrackTotalHits(true)
         .build();
   }
 
   private SearchPage<Sample> searchForSamplePage(NativeQuery query) {
     log.info("Generated Elasticsearch Query: {}", query.getQuery());
     SearchHits<Sample> hits = elasticsearchOperations.search(query, Sample.class);
-    long count = hits.getTotalHits();
-    SearchPage<Sample> searchPage = SearchHitSupport.searchPageFor(hits, query.getPageable());
-    return new SearchPageWrapper<>(searchPage, count);
+    return SearchHitSupport.searchPageFor(hits, query.getPageable());
   }
 
   private boolean isSearchAfterPresentInRequest(SearchQuery searchQuery) {
@@ -85,100 +81,4 @@ public class SearchService {
         && searchAfter.update() != null
         && !StringUtil.isNullOrEmpty(searchAfter.accession());
   }
-
-  private static class SearchPageWrapper<T> implements SearchPage<T> {
-    private final SearchPage<T> delegate;
-    private final long totalElements;
-
-    public SearchPageWrapper(SearchPage<T> delegate, long totalElements) {
-      this.delegate = delegate;
-      this.totalElements = totalElements;
-    }
-
-    @Override
-    public SearchHits<T> getSearchHits() {
-      return delegate.getSearchHits();
-    }
-
-    @Override
-    public int getTotalPages() {
-      return (int) Math.ceil((double) totalElements / delegate.getSize());
-    }
-
-    @Override
-    public long getTotalElements() {
-      return totalElements;
-    }
-
-    @Override
-    public int getNumber() {
-      return delegate.getNumber();
-    }
-
-    @Override
-    public int getSize() {
-      return delegate.getSize();
-    }
-
-    @Override
-    public int getNumberOfElements() {
-      return delegate.getNumberOfElements();
-    }
-
-    @Override
-    public List<SearchHit<T>> getContent() {
-      return delegate.getContent();
-    }
-
-    @Override
-    public boolean hasContent() {
-      return delegate.hasContent();
-    }
-
-    @Override
-    public Sort getSort() {
-      return delegate.getSort();
-    }
-
-    @Override
-    public boolean isFirst() {
-      return delegate.isFirst();
-    }
-
-    @Override
-    public boolean isLast() {
-      return delegate.isLast();
-    }
-
-    @Override
-    public boolean hasNext() {
-      return delegate.hasNext();
-    }
-
-    @Override
-    public boolean hasPrevious() {
-      return delegate.hasPrevious();
-    }
-
-    @Override
-    public Pageable nextPageable() {
-      return delegate.nextPageable();
-    }
-
-    @Override
-    public Pageable previousPageable() {
-      return delegate.previousPageable();
-    }
-
-    @Override
-    public <U> Page<U> map(Function<? super SearchHit<T>, ? extends U> converter) {
-      return delegate.map(converter);
-    }
-
-    @Override
-    public Iterator<SearchHit<T>> iterator() {
-      return delegate.iterator();
-    }
-  }
-
 }
