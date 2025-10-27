@@ -13,10 +13,14 @@ import java.util.Map;
 
 public class AttributeFacet {
   private static final List<String> EXCLUDED_FACETS = List.of(
-      "description", "sample name", "title", "sample comment", "INSDC first public",
-      "INSDC secondary accession", "INSDC last update", "collection date", "SRA accession", "External Id",
-      "Submitter Id");
-  private static final List<String> STATIC_FACETS = List.of("organism", "sex");
+      "description", "sample name", "title", "sample comment", "INSDC first public", "ENA first public",
+      "INSDC secondary accession", "INSDC last update", "ENA last update", "collection date", "SRA accession",
+      "External Id", "Submitter Id", "INSDC center alias", "project name", "geographic location (longitude)",
+      "geographic location (latitude)",
+      "INSDC status");
+  private static final List<String> STATIC_FACETS = List.of(
+      "organism", "sex", "INSDC center name", "ENA-CHECKLIST", "geographic location (country and/or sea)",
+      "NCBI submission model");
 
   public static Aggregation getAggregations(List<String> facets) {
     return Aggregation.of(a -> a
@@ -44,27 +48,31 @@ public class AttributeFacet {
                 .field("characteristics.key.keyword")
                 .exclude(e -> e.terms(EXCLUDED_FACETS))
                 .size(10)
+                .shardSize(200)
             )
             .aggregations("by_value", a2 -> a2
                 .terms(t2 -> t2
                     .field("characteristics.value.keyword")
                     .size(10)
+                    .shardSize(200)
                 )
             )
         )
-        .aggregations("static", a1 -> a1
-            .terms(t -> t
-                .field("characteristics.key.keyword")
-                .include(i -> i.terms(STATIC_FACETS))
-                .size(10)
-            )
-            .aggregations("by_value", a2 -> a2
-                .terms(t2 -> t2
-                    .field("characteristics.value.keyword")
-                    .size(10)
-                )
-            )
-        )
+//        .aggregations("static", a1 -> a1
+//            .terms(t -> t
+//                .field("characteristics.key.keyword")
+//                .include(i -> i.terms(STATIC_FACETS))
+//                .size(10)
+//                .shardSize(200)
+//            )
+//            .aggregations("by_value", a2 -> a2
+//                .terms(t2 -> t2
+//                    .field("characteristics.value.keyword")
+//                    .size(10)
+//                    .shardSize(200)
+//                )
+//            )
+//        )
     );
   }
 

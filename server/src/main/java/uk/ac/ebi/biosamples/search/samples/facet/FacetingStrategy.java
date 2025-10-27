@@ -1,7 +1,6 @@
 package uk.ac.ebi.biosamples.search.samples.facet;
 
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
-import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import uk.ac.ebi.biosamples.search.samples.Sample;
 
