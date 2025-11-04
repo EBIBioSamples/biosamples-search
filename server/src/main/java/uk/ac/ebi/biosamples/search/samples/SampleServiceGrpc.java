@@ -8,8 +8,8 @@ import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.biosamples.search.grpc.*;
-import uk.ac.ebi.biosamples.search.samples.facet.FacetService;
-import uk.ac.ebi.biosamples.search.samples.proto.SearchQueryMapper;
+import uk.ac.ebi.biosamples.search.facet.FacetService;
+import uk.ac.ebi.biosamples.search.proto.SearchQueryMapper;
 
 import java.util.List;
 
@@ -45,7 +45,7 @@ public class SampleServiceGrpc extends SearchGrpc.SearchImplBase {
     return builder.build();
   }
 
-  private static FacetResponse populateFacetResponse(List<uk.ac.ebi.biosamples.search.samples.facet.Facet> facets) {
+  private static FacetResponse populateFacetResponse(List<uk.ac.ebi.biosamples.search.facet.Facet> facets) {
     return FacetResponse.newBuilder()
         .addAllFacets(facets.stream()
             .map(f -> Facet.newBuilder()
@@ -98,7 +98,7 @@ public class SampleServiceGrpc extends SearchGrpc.SearchImplBase {
     log.info("Calling GRPC method get facets.................");
 
     SearchQuery searchQuery = SearchQueryMapper.mapFromGrpcSearchQuery(facetRequest);
-    List<uk.ac.ebi.biosamples.search.samples.facet.Facet> facets = facetService.getFacets(searchQuery);
+    List<uk.ac.ebi.biosamples.search.facet.Facet> facets = facetService.getFacets(searchQuery);
     FacetResponse response = populateFacetResponse(facets);
 
     responseObserver.onNext(response);

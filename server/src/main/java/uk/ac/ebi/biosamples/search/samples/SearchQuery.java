@@ -2,7 +2,7 @@ package uk.ac.ebi.biosamples.search.samples;
 
 import lombok.Builder;
 import lombok.Getter;
-import uk.ac.ebi.biosamples.search.samples.filter.SearchFilter;
+import uk.ac.ebi.biosamples.search.filter.SearchFilter;
 
 import java.util.List;
 

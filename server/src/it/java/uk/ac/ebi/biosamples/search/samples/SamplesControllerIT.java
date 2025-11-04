@@ -12,7 +12,7 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.util.CollectionUtils;
 import uk.ac.ebi.biosamples.search.IntegrationTestConfiguration;
 import uk.ac.ebi.biosamples.search.TestDependencyContainers;
-import uk.ac.ebi.biosamples.search.samples.filter.*;
+import uk.ac.ebi.biosamples.search.filter.*;
 
 import java.util.List;
 

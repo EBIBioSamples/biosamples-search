@@ -11,7 +11,7 @@ import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregatio
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.*;
-import uk.ac.ebi.biosamples.search.samples.facet.FacetService;
+import uk.ac.ebi.biosamples.search.facet.FacetService;
 
 import java.util.List;
 import java.util.Map;

@@ -11,8 +11,8 @@ import org.springframework.hateoas.server.core.EmbeddedWrapper;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
-import uk.ac.ebi.biosamples.search.samples.facet.Facet;
-import uk.ac.ebi.biosamples.search.samples.facet.FacetService;
+import uk.ac.ebi.biosamples.search.facet.Facet;
+import uk.ac.ebi.biosamples.search.facet.FacetService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,30 +22,6 @@ import java.util.List;
 public class SamplesController {
   private final SearchService samplesService;
   private final FacetService facetService;
-
-  @GetMapping("/search")
-  public PagedModel<EmbeddedWrapper> searchSamples(
-      @RequestParam String q, @RequestParam int page, @RequestParam int size) {
-    // q = text + filter -> base64 encoded
-    Page<Sample> samples = samplesService.searchSamples();
-    //EmbeddedWrappers to rename default _embedded serialisation format
-    EmbeddedWrappers wrappers = new EmbeddedWrappers(false);
-    List<EmbeddedWrapper> elements = samples.stream()
-        .map(s -> wrappers.wrap(s.getAccession(), LinkRelation.of("accessions")))
-        .toList();
-
-    List<Link> links = populateLinks(samples);
-
-    return PagedModel.of(
-        elements,
-        new PagedModel.PageMetadata(
-            samples.getSize(),
-            samples.getNumber(),
-            samples.getTotalElements(),
-            samples.getTotalPages()
-        ),
-        links);
-  }
 
   @PostMapping("/search")
   public PagedModel<EmbeddedWrapper> searchSamples(@RequestBody SearchQuery query) {

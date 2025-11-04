@@ -1,4 +1,4 @@
-FROM gradle:8.14-jdk24 AS builder
+FROM gradle:9.2-jdk25 AS builder
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ RUN gradle --no-daemon clean build -x test || return 0
 COPY . .
 RUN gradle :server:bootJar --no-daemon -x test
 
-FROM eclipse-temurin:24-jre
+FROM eclipse-temurin:25-jre
 WORKDIR /app
 COPY --from=builder /app/server/build/libs/*.jar biosamples-search.jar
 EXPOSE 8080

@@ -4,7 +4,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.*;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import uk.ac.ebi.biosamples.search.samples.SearchQuery;
-import uk.ac.ebi.biosamples.search.samples.filter.SearchFilter;
+import uk.ac.ebi.biosamples.search.filter.SearchFilter;
 
 import java.util.List;
 
