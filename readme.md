@@ -2,9 +2,17 @@
 BioSamples search is a Spring Boot application leveraging ElasticSearch for full-text search, filtering and faceting.
 
 ## Project Structure
-The project contains 2 modules: `proto` and `server`. 
-- `proto` - Protobuf definitions and generated code
-- `server` - Spring Boot application exposing endpoints
+The project contains 2 modules: `proto` and `server`. The following list shows important directories in the project.
++ `proto` - protobuf definitions and generated code
++ `server` - server application exposing search endpoints
+  ..
+    - `model` - core biosamples model
+    - `filter` - filtering related code
+    - `facet` - faceting related code
++ `helm` - cicd, k8s deployment
++ `k8s` - other related deployment files (ES, PV, ..)
++ `docs` - further documentation
+
 
 ## API
 Three main APIs are exposed by the application.
@@ -17,7 +25,7 @@ BioSamples core services uses GRPC to communicate with `biosamples-search`. The 
 ### Build
 
 #### Requirements
-- Java 25
+- Java 24
 
 ```shell
 ./gradlew build
@@ -80,8 +88,8 @@ curl --location 'http://localhost:8080/facet' \
 ```
 
 
-### Elastic
-```shell
-curl -u elastic:elastic -X GET "http://localhost:9200/_cluster/health?pretty"
-```
+### Facets
+Currently, there are two faceting strategies implemented. The default implementation `RegularFacetingStratey` could be slow due to large number of attributes in BioSamples database. 
+The `SamplingFacetingStrategy` uses sampling method to get facets from all shards faster, but is not providing the exact facet count. 
+It is possible to limit the set of attributes to be faceted for even faster results. This is left as a future enhancement. 
 
