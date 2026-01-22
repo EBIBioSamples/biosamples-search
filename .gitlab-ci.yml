@@ -29,7 +29,6 @@ build_docker_image:
   after_script:
     - docker logout ${CI_REGISTRY}
 
-
 deploy_primary_dev:
   variables:
     ENVIRONMENT_NAME: primary_dev
