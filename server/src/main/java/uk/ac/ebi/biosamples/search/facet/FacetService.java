@@ -52,7 +52,7 @@ public class FacetService {
     NativeQueryBuilder builder = NativeQuery.builder()
         .withQuery(searchQuery)
         .withMaxResults(0)
-        .withTimeout(Duration.ofSeconds(30));
+        .withTimeout(Duration.ofSeconds(60));
 
     if (!aggregations.isEmpty()) {
       aggregations.forEach(builder::withAggregation);
