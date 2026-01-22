@@ -39,6 +39,7 @@ deploy_primary_dev:
   only:
     - dev
     - main
+    - chore/working-es-search-and-faceting
   when: manual
   extends: .kube_deploy_script
 
@@ -52,6 +53,7 @@ deploy_primary_prod:
   only:
     - dev
     - main
+    - chore/working-es-search-and-faceting
   when: manual
   extends: .kube_deploy_script
 
@@ -65,6 +67,7 @@ deploy_fallback_prod:
   only:
     - dev
     - main
+    - chore/working-es-search-and-faceting
   when: manual
   extends: .kube_deploy_script
 
