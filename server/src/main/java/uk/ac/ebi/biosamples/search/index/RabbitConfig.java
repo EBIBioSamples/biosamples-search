@@ -22,6 +22,11 @@ public class RabbitConfig {
   }
 
   @Bean
+  Queue reindexingQueue() {
+    return new Queue(REINDEXING_QUEUE, true);
+  }
+
+  @Bean
   DirectExchange exchange() {
     return new DirectExchange(INDEXING_EXCHANGE);
   }
@@ -32,11 +37,16 @@ public class RabbitConfig {
   }
 
   @Bean
+  Binding reindexingBinding(Queue reindexingQueue, DirectExchange exchange) {
+    return BindingBuilder.bind(reindexingQueue).to(exchange).with(REINDEXING_QUEUE);
+  }
+
+  @Bean
   SimpleMessageListenerContainer container(ConnectionFactory connectionFactory,
                                            MessageListenerAdapter listenerAdapter) {
     SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
     container.setConnectionFactory(connectionFactory);
-    container.setQueueNames(INDEXING_QUEUE);
+    container.setQueueNames(INDEXING_QUEUE, REINDEXING_QUEUE);
     container.setMessageListener(listenerAdapter);
     return container;
   }
