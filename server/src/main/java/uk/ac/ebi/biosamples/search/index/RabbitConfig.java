@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitConfig {
   public static final String INDEXING_EXCHANGE = "biosamples.indexing";
+  public static final String REINDEXING_EXCHANGE = "biosamples.reindexing";
   public static final String INDEXING_QUEUE = "biosamples.indexing.es";
   public static final String REINDEXING_QUEUE = "biosamples.reindexing.es";
 
@@ -32,13 +33,18 @@ public class RabbitConfig {
   }
 
   @Bean
-  Binding binding(Queue queue, DirectExchange exchange) {
-    return BindingBuilder.bind(queue).to(exchange).with(INDEXING_QUEUE);
+  DirectExchange reindexingExchange() {
+    return new DirectExchange(REINDEXING_EXCHANGE);
   }
 
   @Bean
-  Binding reindexingBinding(Queue reindexingQueue, DirectExchange exchange) {
-    return BindingBuilder.bind(reindexingQueue).to(exchange).with(REINDEXING_QUEUE);
+  Binding reindexingBinding(Queue reindexingQueue, DirectExchange reindexingExchange) {
+    return BindingBuilder.bind(reindexingQueue).to(reindexingExchange).with(REINDEXING_QUEUE);
+  }
+
+  @Bean
+  Binding binding(Queue queue, DirectExchange exchange) {
+    return BindingBuilder.bind(queue).to(exchange).with(INDEXING_QUEUE);
   }
 
   @Bean
