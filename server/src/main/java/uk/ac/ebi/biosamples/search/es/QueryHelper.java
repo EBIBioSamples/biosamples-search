@@ -8,14 +8,20 @@ import uk.ac.ebi.biosamples.search.filter.DateRangeSearchFilter;
 import uk.ac.ebi.biosamples.search.filter.PublicSearchFilter;
 import uk.ac.ebi.biosamples.search.filter.SearchFilter;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class QueryHelper {
 
   public static Query getSearchQuery(SearchQuery searchQuery) {
-    Query match = getTextMatchQuery(searchQuery);
     Query filter = getFilterQuery(searchQuery);
+    if (!StringUtils.hasText(searchQuery.getText())) {
+      return filter;
+    }
+    Query match = getTextMatchQuery(searchQuery);
     return BoolQuery.of(b -> b
         .must(match)
         .filter(filter)
@@ -44,17 +50,22 @@ public class QueryHelper {
 
   }
 
+  private static final String DEFAULT_DATE_FROM = "1970-01-01T00:00:00.000Z";
+
   private static Query getFilterQuery(SearchQuery searchQuery) {
     if (CollectionUtils.isEmpty(searchQuery.getFilters())) {
       return MatchAllQuery.of(m -> m)._toQuery();
     }
 
     List<SearchFilter> filters = searchQuery.getFilters();
-    boolean hasReleaseDateRange = filters.stream()
-        .anyMatch(f -> f instanceof DateRangeSearchFilter dt
-            && dt.field() == DateRangeSearchFilter.DateField.RELEASE);
 
-    List<Query> mustQueries = new ArrayList<>();
+    // Merge multiple date ranges on the same field into one (intersection: max from, min to)
+    Map<DateRangeSearchFilter.DateField, Query> mergedDateRangeQueries = getMergedDateRangeQueries(filters);
+    List<Query> mustQueries = new ArrayList<>(mergedDateRangeQueries.values());
+
+    boolean hasReleaseDateRange = mergedDateRangeQueries.containsKey(DateRangeSearchFilter.DateField.RELEASE)
+        || filters.stream().anyMatch(f -> f instanceof DateRangeSearchFilter dt
+            && dt.field() == DateRangeSearchFilter.DateField.RELEASE);
     boolean needExcludeSuppressed = false;
 
     for (SearchFilter filter : filters) {
@@ -62,6 +73,12 @@ public class QueryHelper {
         needExcludeSuppressed = true;
         continue;
       }
+
+      if (filter instanceof DateRangeSearchFilter dt
+          && mergedDateRangeQueries.containsKey(dt.field())) {
+        continue;
+      }
+
       mustQueries.add(filter.getQuery());
     }
 
@@ -72,6 +89,35 @@ public class QueryHelper {
       )._toQuery();
     }
     return BoolQuery.of(b -> b.must(mustQueries))._toQuery();
+  }
+
+  /**
+   * Groups date range filters by field and merges multiple ranges on the same field
+   * into one (intersection: latest from, earliest to). Returns a map of field -> a merged query
+   * only for fields that had more than one filter.
+   */
+  private static Map<DateRangeSearchFilter.DateField, Query> getMergedDateRangeQueries(List<SearchFilter> filters) {
+    final String defaultTo = Instant.now().toString();
+    final Map<DateRangeSearchFilter.DateField, List<DateRangeSearchFilter>> byField = filters.stream()
+        .filter(f -> f instanceof DateRangeSearchFilter)
+        .map(f -> (DateRangeSearchFilter) f)
+        .collect(Collectors.groupingBy(DateRangeSearchFilter::field));
+
+    return byField.entrySet().stream()
+        .filter(e -> e.getValue().size() > 1)
+        .collect(Collectors.toMap(Map.Entry::getKey, e -> {
+          final List<DateRangeSearchFilter> list = e.getValue();
+          final String mergedFrom = list.stream()
+              .map(dt -> StringUtils.hasText(dt.from()) ? dt.from() : DEFAULT_DATE_FROM)
+              .max(String::compareTo)
+              .orElse(DEFAULT_DATE_FROM);
+          final String mergedTo = list.stream()
+              .map(dt -> StringUtils.hasText(dt.to()) ? dt.to() : defaultTo)
+              .min(String::compareTo)
+              .orElse(defaultTo);
+
+          return new DateRangeSearchFilter(e.getKey(), mergedFrom, mergedTo).getQuery();
+        }));
   }
 
 
