@@ -4,6 +4,10 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.7"
 }
 
+tasks.bootJar {
+	mainClass.set("uk.ac.ebi.biosamples.search.BiosamplesSearchApplication")
+}
+
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(24)
