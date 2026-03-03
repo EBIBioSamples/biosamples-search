@@ -1,0 +1,24 @@
+{
+  "text": "",
+  "filters": [
+    {
+      "type": "dt",
+      "field": "release",
+      "from": "2014-01-01T00:00:00Z",
+      "to": "2015-01-02T00:00:00Z"
+    },
+    {
+      "type": "excludeAttr",
+      "field": "INSDC status",
+      "values": ["suppressed"]
+    }
+  ],
+  "page": 0,
+  "size": 10,
+  "sort": [
+    {
+      "direction": "DESC",
+      "field": "update"
+    }
+  ]
+}

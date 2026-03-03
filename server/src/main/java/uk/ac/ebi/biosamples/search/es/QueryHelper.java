@@ -42,10 +42,24 @@ public class QueryHelper {
 
 //    return MatchQuery.of(m -> m.field("sample_full_text").query(searchText))._toQuery();
 
-    return QueryStringQuery.of(qs -> qs
-        .defaultField("sample_full_text")
-        .query(searchText)
-        .defaultOperator(Operator.Or) // Default to OR if no operator is specified by the user
+    // Unquoted text: prefer exact phrase matches, but still include documents
+    // that contain all terms in any order. Phrase matches are boosted so they rank first.
+    return BoolQuery.of(b -> b
+        .should(s -> s
+            .matchPhrase(mp -> mp
+                .field("sample_full_text")
+                .query(searchText)
+                .boost(5.0f)
+            )
+        )
+        .should(s -> s
+            .queryString(qs -> qs
+                .defaultField("sample_full_text")
+                .query(searchText)
+                .defaultOperator(Operator.And)
+            )
+        )
+        .minimumShouldMatch("1")
     )._toQuery();
 
   }
