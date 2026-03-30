@@ -34,8 +34,9 @@ public class FacetService {
   public List<Facet> getFacets(SearchQuery searchQuery) {
     Query esSearchQuery = QueryHelper.getSearchQuery(searchQuery);
     Map<String, Aggregation> aggregations = getAggregations(searchQuery);
+    log.info("Generated Elasticsearch Aggregations: {} aggregations configured", aggregations.size());
     NativeQuery query = getEsNativeQuery(esSearchQuery, aggregations);
-    return retrieveFacets(query);
+    return retrieveFacets(query, aggregations);
   }
 
   private Map<String, Aggregation> getAggregations(SearchQuery searchQuery) {
@@ -51,7 +52,7 @@ public class FacetService {
     NativeQueryBuilder builder = NativeQuery.builder()
         .withQuery(searchQuery)
         .withMaxResults(0)
-        .withTimeout(Duration.ofSeconds(30));
+        .withTimeout(Duration.ofSeconds(60));
 
     if (!aggregations.isEmpty()) {
       aggregations.forEach(builder::withAggregation);
@@ -60,8 +61,9 @@ public class FacetService {
     return builder.build();
   }
 
-  public List<Facet> retrieveFacets(NativeQuery query) {
+  public List<Facet> retrieveFacets(NativeQuery query, Map<String, Aggregation> aggregations) {
     log.info("Generated Elasticsearch Query: {}", query.getQuery());
+    log.info("Generated Elasticsearch Aggregations ({}): {}", aggregations.size(), aggregations.keySet());
     SearchHits<Sample> hits = elasticsearchOperations.search(query, Sample.class);
     return facetingStrategy.retrieveFacets(hits);
   }

@@ -3,9 +3,11 @@ package uk.ac.ebi.biosamples.search.samples;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.context.ImportTestcontainers;
 import org.springframework.context.annotation.Import;
+import org.springframework.grpc.server.lifecycle.GrpcServerLifecycle;
 import uk.ac.ebi.biosamples.search.IntegrationTestConfiguration;
 import uk.ac.ebi.biosamples.search.TestDependencyContainers;
 import uk.ac.ebi.biosamples.search.grpc.*;
@@ -21,6 +23,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Import(IntegrationTestConfiguration.class)
 @ImportTestcontainers(TestDependencyContainers.class)
 public class SampleServiceGrpcIT {
+
+  @Autowired
+  private GrpcServerLifecycle grpcServerLifecycle;
 
   @Test
   void searchSamples_shouldReturnFirstAccessionPage() {
@@ -159,7 +164,8 @@ public class SampleServiceGrpcIT {
   }
 
   void runTestWithSetupAndTearDown(Consumer<SearchGrpc.SearchBlockingStub> test) {
-    ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 9090)
+    int grpcPort = grpcServerLifecycle.getPort();
+    ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", grpcPort)
         .usePlaintext()
         .build();
     SearchGrpc.SearchBlockingStub searchBlockingStub = SearchGrpc.newBlockingStub(channel);

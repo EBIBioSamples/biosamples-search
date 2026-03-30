@@ -1,0 +1,17 @@
+{
+  "text": "",
+  "filters": [
+    {
+      "type": "sdata",
+      "dataType": "AMR"
+    }
+  ],
+  "page": 0,
+  "size": 10,
+  "sort": [
+    {
+      "direction": "DESC",
+      "field": "update"
+    }
+  ]
+}

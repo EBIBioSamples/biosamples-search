@@ -11,6 +11,9 @@ import java.time.Instant;
 
 public record DateRangeSearchFilter(DateField field, String from, String to) implements SearchFilter {
 
+  /** Sentinel "end of time" sent by clients when "to" is omitted; ES cannot parse it. Treat as "no end" → now. */
+  private static final String SENTINEL_FAR_FUTURE_PREFIX = "+999999999";
+
   @JsonIgnore
   public Query getQuery() {
     //todo from, to validation "2023-05-12T15:12:56.113Z"
@@ -21,8 +24,11 @@ public record DateRangeSearchFilter(DateField field, String from, String to) imp
     } else {
       builder.gte("1970-01-01T00:00:00.000Z");
     }
-    if (StringUtils.hasText(to)) {
-      builder.lte(to);
+
+    String effectiveTo = effectiveTo();
+    
+    if (StringUtils.hasText(effectiveTo)) {
+      builder.lte(effectiveTo);
     } else {
       builder.lte(Instant.now().toString());
     }
@@ -30,6 +36,19 @@ public record DateRangeSearchFilter(DateField field, String from, String to) imp
     return RangeQuery.of(r -> r
         .date(builder.build())
     )._toQuery();
+  }
+
+  /** Use {@code to} unless it is the far-future sentinel (e.g. +999999999-12-31...); then treat as no end. */
+  private String effectiveTo() {
+    if (!StringUtils.hasText(to)) {
+      return null;
+    }
+
+    if (to.startsWith(SENTINEL_FAR_FUTURE_PREFIX)) {
+      return null;
+    }
+    
+    return to;
   }
 
   public enum DateField {

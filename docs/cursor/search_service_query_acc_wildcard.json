@@ -1,0 +1,12 @@
+{
+  "text": null,
+  "filters": [
+    { "type": "pub", "webinId": "" },
+    { "type": "acc", "accession": "SAME*" }
+  ],
+  "facets": null,
+  "page": 0,
+  "size": 20,
+  "sort": null,
+  "searchAfter": null
+}

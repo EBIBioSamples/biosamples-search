@@ -6,6 +6,9 @@ spring:
     port: 5672
     username: guest
     password: guest
+  grpc:
+    server:
+      port: 0
   jackson:
     deserialization:
       FAIL_ON_UNKNOWN_PROPERTIES: false

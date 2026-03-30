@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitConfig {
   public static final String INDEXING_EXCHANGE = "biosamples.indexing";
+  public static final String REINDEXING_EXCHANGE = "biosamples.reindexing";
   public static final String INDEXING_QUEUE = "biosamples.indexing.es";
   public static final String REINDEXING_QUEUE = "biosamples.reindexing.es";
 
@@ -22,8 +23,23 @@ public class RabbitConfig {
   }
 
   @Bean
+  Queue reindexingQueue() {
+    return new Queue(REINDEXING_QUEUE, true);
+  }
+
+  @Bean
   DirectExchange exchange() {
     return new DirectExchange(INDEXING_EXCHANGE);
+  }
+
+  @Bean
+  DirectExchange reindexingExchange() {
+    return new DirectExchange(REINDEXING_EXCHANGE);
+  }
+
+  @Bean
+  Binding reindexingBinding(Queue reindexingQueue, DirectExchange reindexingExchange) {
+    return BindingBuilder.bind(reindexingQueue).to(reindexingExchange).with(REINDEXING_QUEUE);
   }
 
   @Bean
@@ -36,7 +52,7 @@ public class RabbitConfig {
                                            MessageListenerAdapter listenerAdapter) {
     SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
     container.setConnectionFactory(connectionFactory);
-    container.setQueueNames(INDEXING_QUEUE);
+    container.setQueueNames(INDEXING_QUEUE, REINDEXING_QUEUE);
     container.setMessageListener(listenerAdapter);
     return container;
   }
