@@ -133,6 +133,4 @@ public class QueryHelper {
           return new DateRangeSearchFilter(e.getKey(), mergedFrom, mergedTo).getQuery();
         }));
   }
-
-
 }

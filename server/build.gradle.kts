@@ -15,6 +15,9 @@ java {
 }
 
 sourceSets {
+	main {
+		resources.srcDir("../k8s/es")
+	}
 	create("integrationTest") {
 		java.srcDir("src/it/java")
 		resources.srcDir("src/it/resources")
