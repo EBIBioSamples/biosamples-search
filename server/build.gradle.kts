@@ -4,6 +4,10 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.7"
 }
 
+tasks.bootJar {
+	mainClass.set("uk.ac.ebi.biosamples.search.BiosamplesSearchApplication")
+}
+
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(24)
@@ -11,6 +15,9 @@ java {
 }
 
 sourceSets {
+	main {
+		resources.srcDir("../k8s/es")
+	}
 	create("integrationTest") {
 		java.srcDir("src/it/java")
 		resources.srcDir("src/it/resources")

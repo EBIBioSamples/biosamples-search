@@ -2,10 +2,12 @@ FROM gradle:8.14-jdk24 AS builder
 
 WORKDIR /app
 
-# Copy module build files only, to warm up and pre-resolve dependencies
+# Copy minimal Gradle build files first, to warm up and pre-resolve dependencies
+COPY settings.gradle.kts .
+COPY build.gradle.kts .
 COPY proto/build.gradle.kts proto/
 COPY server/build.gradle.kts server/
-RUN gradle --no-daemon clean build -x test || return 0
+RUN gradle --no-daemon dependencies || true
 
 COPY . .
 RUN gradle :server:bootJar --no-daemon -x test

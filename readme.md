@@ -20,7 +20,7 @@ Three main APIs are exposed by the application.
 2. Search samples streaming (GRPC)
 3. Get facets for search (POST, GRPC)
 
-BioSamples core services uses GRPC to communicate with `biosamples-search`. The RESTfull services are implemented mainly for the testing and development purposes. 
+BioSamples core services uses GRPC to communicate with `biosamples-search`. The RESTful services are implemented mainly for the testing and development purposes. 
 
 ### Build
 

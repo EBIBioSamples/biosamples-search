@@ -1,19 +1,26 @@
 services:
-#  biosamples-search:
-#    build: .
-#    image: biosamples-search:latest
-#    ports:
-#      - "8080:8080"
-#      - "9090:9090"
-#    environment:
-#      - spring.elasticsearch.username=elastic
-#      - spring.elasticsearch.password=elastic
-#      - spring.elasticsearch.uris=http://elastic:9200
-#    links:
-#      - elastic
+  biosamples-search:
+    build: .
+    image: biosamples-search:latest
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+    depends_on:
+      elastic:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    environment:
+      - spring.elasticsearch.username=elastic
+      - spring.elasticsearch.password=elastic
+      - spring.elasticsearch.uris=http://elastic:9200
+      - spring.rabbitmq.host=rabbitmq
   setup:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     user: "0"
+    depends_on:
+      elastic:
+        condition: service_healthy
     command: >
       bash -c '
         if [ x${ELASTIC_PASSWORD} == x ]; then
@@ -29,11 +36,6 @@ services:
         until curl -s -X POST -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" http://elastic:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
         echo "All done!";
       '
-    healthcheck:
-      test: [ "CMD-SHELL", "[ -f config/certs/es01/es01.crt ]" ]
-      interval: 1s
-      timeout: 5s
-      retries: 120
   elastic:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     volumes:
